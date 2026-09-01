@@ -1,10 +1,11 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import { markdown } from './plugins/vite-plugin-markdown'
 
 export default defineConfig({
   base: '/',
-  plugins: [react()],
+  plugins: [markdown(), react()],
   ssgOptions: {
     script: 'async',
     formatting: 'minify',
