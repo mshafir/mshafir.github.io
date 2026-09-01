@@ -1,0 +1,31 @@
+{
+  "featured": [
+    "auto-adventure",
+    "reactlit",
+    "react-element-replace",
+    "vislib",
+    "codenames-ai",
+    "multilaunch"
+  ],
+  "hidden": ["weddingsite", "kavod-crm", "ember-java-starter-kit"],
+  "overrides": {
+    "auto-adventure": {
+      "blurb": "A terminal adventure game whose maps, rooms and encounters are generated on the fly by an LLM."
+    },
+    "reactlit": {
+      "blurb": "A faster way to build React apps — Streamlit's ergonomics without leaving the React ecosystem."
+    },
+    "react-element-replace": {
+      "blurb": "A component that rewrites its own subtree, replacing matching elements as they render."
+    },
+    "vislib": {
+      "blurb": "Web-based visualizations for Python and IPython notebooks."
+    },
+    "codenames-ai": {
+      "blurb": "An agent that plays Codenames, reasoning over word embeddings to find the clue linking the most cards."
+    },
+    "multilaunch": {
+      "blurb": "A small CLI for running and supervising several processes at once."
+    }
+  }
+}

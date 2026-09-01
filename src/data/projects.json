@@ -1,0 +1,128 @@
+[
+  {
+    "name": "auto-adventure",
+    "url": "https://github.com/mshafir/auto-adventure",
+    "blurb": "A terminal adventure game whose maps, rooms and encounters are generated on the fly by an LLM.",
+    "language": "TypeScript",
+    "stars": 1,
+    "pushedAt": "2026-08-17T12:56:53Z",
+    "featured": true
+  },
+  {
+    "name": "reactlit",
+    "url": "https://github.com/mshafir/reactlit",
+    "blurb": "A faster way to build React apps — Streamlit's ergonomics without leaving the React ecosystem.",
+    "language": "TypeScript",
+    "stars": 12,
+    "pushedAt": "2025-04-25T15:04:25Z",
+    "featured": true
+  },
+  {
+    "name": "react-element-replace",
+    "url": "https://github.com/mshafir/react-element-replace",
+    "blurb": "A component that rewrites its own subtree, replacing matching elements as they render.",
+    "language": "TypeScript",
+    "stars": 7,
+    "pushedAt": "2023-01-04T23:39:24Z",
+    "featured": true
+  },
+  {
+    "name": "vislib",
+    "url": "https://github.com/mshafir/vislib",
+    "blurb": "Web-based visualizations for Python and IPython notebooks.",
+    "language": "Python",
+    "stars": 3,
+    "pushedAt": "2018-06-07T20:01:29Z",
+    "featured": true
+  },
+  {
+    "name": "codenames-ai",
+    "url": "https://github.com/mshafir/codenames-ai",
+    "blurb": "An agent that plays Codenames, reasoning over word embeddings to find the clue linking the most cards.",
+    "language": "CSS",
+    "stars": 3,
+    "pushedAt": "2017-12-19T00:06:39Z",
+    "featured": true
+  },
+  {
+    "name": "multilaunch",
+    "url": "https://github.com/mshafir/multilaunch",
+    "blurb": "A small CLI for running and supervising several processes at once.",
+    "language": "TypeScript",
+    "stars": 1,
+    "pushedAt": "2021-11-11T16:07:01Z",
+    "featured": true
+  },
+  {
+    "name": "reactlit-next-starter",
+    "url": "https://github.com/mshafir/reactlit-next-starter",
+    "blurb": "Starter for Reaclit and Nextjs",
+    "language": "TypeScript",
+    "stars": 1,
+    "pushedAt": "2024-12-16T14:03:49Z",
+    "featured": false
+  },
+  {
+    "name": "ember-app-styles",
+    "url": "https://github.com/mshafir/ember-app-styles",
+    "blurb": "My personal base style set for ember applications",
+    "language": "HTML",
+    "stars": 3,
+    "pushedAt": "2018-06-27T01:54:05Z",
+    "featured": false
+  },
+  {
+    "name": "ember-starterapp",
+    "url": "https://github.com/mshafir/ember-starterapp",
+    "blurb": "A non-standard set of initial configurations and addons, my preferred starting place",
+    "language": "JavaScript",
+    "stars": 3,
+    "pushedAt": "2018-06-12T19:14:07Z",
+    "featured": false
+  },
+  {
+    "name": "liquid-fire-flip",
+    "url": "https://github.com/mshafir/liquid-fire-flip",
+    "blurb": "Flip animation for ember liquid-fire",
+    "language": "JavaScript",
+    "stars": 3,
+    "pushedAt": "2017-11-11T23:50:44Z",
+    "featured": false
+  },
+  {
+    "name": "virtual-reality-camera",
+    "url": "https://github.com/mshafir/virtual-reality-camera",
+    "blurb": "A server to control an rPI rotating camera setup for hosting a VR stream.",
+    "language": "HTML",
+    "stars": 2,
+    "pushedAt": "2017-03-30T19:37:16Z",
+    "featured": false
+  },
+  {
+    "name": "ember-cli-force-layout",
+    "url": "https://github.com/mshafir/ember-cli-force-layout",
+    "blurb": "An ember component for a D3 Force Layout Graph",
+    "language": "JavaScript",
+    "stars": 3,
+    "pushedAt": "2015-10-07T02:46:27Z",
+    "featured": false
+  },
+  {
+    "name": "lypse",
+    "url": "https://github.com/mshafir/lypse",
+    "blurb": "Rapid-prototyping library for meteor built on top of knockout.meteor",
+    "language": "JavaScript",
+    "stars": 1,
+    "pushedAt": "2014-02-04T05:48:55Z",
+    "featured": false
+  },
+  {
+    "name": "SpeechCookingAssistant",
+    "url": "https://github.com/mshafir/SpeechCookingAssistant",
+    "blurb": "",
+    "language": "Java",
+    "stars": 4,
+    "pushedAt": "2011-12-30T22:32:20Z",
+    "featured": false
+  }
+]
