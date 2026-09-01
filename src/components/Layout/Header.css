@@ -1,0 +1,79 @@
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  position: sticky;
+  top: 0;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  z-index: 20;
+}
+
+.header__brand {
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.header__brand-dim {
+  color: var(--dim);
+}
+
+.header__nav {
+  display: flex;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.header__link {
+  text-decoration: none;
+  color: var(--dim);
+  transition: color 120ms ease;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.header__link:hover {
+  color: var(--text);
+}
+
+.header__link--active {
+  color: var(--accent);
+}
+
+.header__chord {
+  font-size: 0.7rem;
+  color: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 var(--space-1);
+}
+
+.header__link:hover .header__chord,
+.header__link--active .header__chord {
+  color: var(--dim);
+}
+
+@media (max-width: 767px) {
+  .header {
+    padding: var(--space-3) var(--space-4);
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .header__nav {
+    gap: var(--space-4);
+    width: 100%;
+  }
+
+  /* Chord hints are meaningless without a keyboard. */
+  .header__chord {
+    display: none;
+  }
+}
