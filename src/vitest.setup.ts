@@ -16,7 +16,7 @@ if (!window.matchMedia) {
 }
 
 // jsdom has no IntersectionObserver; the rain canvases construct one on mount.
-if (!('IntersectionObserver' in window)) {
+if (!window.IntersectionObserver) {
   class StubObserver {
     observe() {}
     unobserve() {}
