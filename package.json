@@ -9,7 +9,7 @@
     "test": "vitest run",
     "dev": "vite",
     "build": "vite-react-ssg build",
-    "preview": "vite preview",
+    "preview": "node scripts/preview.mjs",
     "typecheck": "tsc --noEmit",
     "data:voxels": "node scripts/build-voxels.mjs",
     "data:github": "node scripts/fetch-github.mjs"

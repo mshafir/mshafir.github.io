@@ -8,8 +8,12 @@ const data = voxelData as VoxelData
 
 const MAX_YAW = MathUtils.degToRad(14)
 const MAX_PITCH = MathUtils.degToRad(8)
+/** Standing three-quarter turn: head-on, the relief's steps catch no light. */
+const BASE_YAW = MathUtils.degToRad(-10)
 const ASSEMBLE_SECONDS = 1.2
 const SCATTER_RADIUS = 60
+/** Framing is tuned for this many cells across; other grids scale to match. */
+const REFERENCE_GRID = 64
 
 function VoxelCloud({ animate }: { animate: boolean }) {
   const meshRef = useRef<InstancedMesh>(null)
@@ -78,7 +82,7 @@ function VoxelCloud({ animate }: { animate: boolean }) {
     }
 
     if (!animate) {
-      mesh.rotation.set(0, 0, 0)
+      mesh.rotation.set(0, BASE_YAW, 0)
       return
     }
 
@@ -92,15 +96,16 @@ function VoxelCloud({ animate }: { animate: boolean }) {
       : pointer.current.y * MAX_PITCH + Math.cos(elapsed.current * 0.22) * 0.015
 
     // Damped follow: the head eases toward the cursor and never snaps.
-    mesh.rotation.y = MathUtils.damp(mesh.rotation.y, targetYaw, 3, delta)
+    mesh.rotation.y = MathUtils.damp(mesh.rotation.y, BASE_YAW + targetYaw, 3, delta)
     mesh.rotation.x = MathUtils.damp(mesh.rotation.x, targetPitch, 3, delta)
   })
 
+  const fit = REFERENCE_GRID / data.size
   return (
-    <group scale={size.width < 768 ? 0.75 : 1}>
+    <group scale={(size.width < 768 ? 0.75 : 1) * fit}>
       <instancedMesh ref={meshRef} args={[undefined, undefined, layout.length]}>
         <boxGeometry args={[0.92, 0.92, 0.92]} />
-        <meshStandardMaterial roughness={0.62} metalness={0.08} />
+        <meshStandardMaterial roughness={0.78} metalness={0.02} />
       </instancedMesh>
     </group>
   )
@@ -112,11 +117,16 @@ export default function VoxelScene({ animate }: { animate: boolean }) {
       camera={{ position: [0, 0, 92], fov: 38 }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true }}
+      // ACES tone mapping (r3f's default) washes the pale skin tones flat.
+      flat
     >
-      <ambientLight intensity={0.45} />
-      <directionalLight position={[30, 40, 60]} intensity={2.1} />
+      <ambientLight intensity={0.44} />
+      {/* Raking key from the side: it is the angle, not the brightness, that
+          makes the voxel steps read as depth. */}
+      <directionalLight position={[60, 42, 48]} intensity={2.05} />
+      <directionalLight position={[-45, -12, 40]} intensity={0.5} color="#8FA3C4" />
       {/* Cyan rim light lifts the silhouette off the near-black ground. */}
-      <directionalLight position={[-50, 10, -30]} intensity={1.6} color="#22D3EE" />
+      <directionalLight position={[-55, 18, -30]} intensity={1.1} color="#22D3EE" />
       <VoxelCloud animate={animate} />
     </Canvas>
   )

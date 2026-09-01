@@ -7,11 +7,16 @@
  */
 
 export const DEFAULTS = {
-  size: 64, // grid resolution (N x N cells)
-  domeDepth: 10, // voxels of curvature across the head
-  reliefDepth: 4, // voxels of feature relief from brightness
+  size: 96, // grid resolution (N x N cells)
+  domeDepth: 14, // voxels of curvature across the head
+  reliefDepth: 7, // voxels of feature relief from brightness
   bgTolerance: 28, // euclidean RGB distance from the border reference color
   greenBias: 1.0, // g must exceed r by this factor to read as foliage bokeh
+  // A headshot averaged down to one color per cell is very low contrast, and
+  // at portrait scale the eyes, glasses and hairline wash into the skin.
+  // Pushing each channel away from the subject's mean restores the features.
+  contrast: 1.45,
+  saturation: 1.15,
 }
 
 const luma = (r, g, b) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
@@ -157,13 +162,41 @@ function largestComponent(bg, size) {
   return { label, best }
 }
 
+const clamp8 = (value) => Math.max(0, Math.min(255, Math.round(value)))
+
+/** Mean color of the cells that survived background removal. */
+function subjectMean(cells, keep) {
+  let r = 0, g = 0, b = 0, n = 0
+  for (let i = 0; i < cells.length; i++) {
+    if (!keep(i)) continue
+    r += cells[i].r; g += cells[i].g; b += cells[i].b; n++
+  }
+  return n === 0 ? null : { r: r / n, g: g / n, b: b / n }
+}
+
 export function voxelize(image, options = {}) {
   const opts = { ...DEFAULTS, ...options }
-  const { size, domeDepth, reliefDepth } = opts
+  const { size, domeDepth, reliefDepth, contrast, saturation } = opts
 
   const cells = downsample(image, size)
   const bg = findBackground(cells, size, opts)
   const { label, best } = largestComponent(bg, size)
+
+  const kept = (i) => !bg[i] && label[i] === best
+  const mean = subjectMean(cells, kept)
+
+  const grade = (cell) => {
+    if (!mean) return cell
+    const r = mean.r + (cell.r - mean.r) * contrast
+    const g = mean.g + (cell.g - mean.g) * contrast
+    const b = mean.b + (cell.b - mean.b) * contrast
+    const grey = (r + g + b) / 3
+    return {
+      r: clamp8(grey + (r - grey) * saturation),
+      g: clamp8(grey + (g - grey) * saturation),
+      b: clamp8(grey + (b - grey) * saturation),
+    }
+  }
 
   const half = size / 2
   const voxels = []
@@ -171,9 +204,9 @@ export function voxelize(image, options = {}) {
   for (let gy = 0; gy < size; gy++) {
     for (let gx = 0; gx < size; gx++) {
       const idx = gy * size + gx
-      if (bg[idx] || label[idx] !== best) continue
+      if (!kept(idx)) continue
 
-      const cell = cells[idx]
+      const cell = grade(cells[idx])
       // Normalized offset from the grid center, in the range -1..1.
       const u = (gx + 0.5 - half) / half
       const v = (gy + 0.5 - half) / half
@@ -185,9 +218,9 @@ export function voxelize(image, options = {}) {
         Math.round(gx - half),
         Math.round(half - gy), // flip so +y is up in three.js world space
         z,
-        Math.round(cell.r),
-        Math.round(cell.g),
-        Math.round(cell.b),
+        cell.r,
+        cell.g,
+        cell.b,
       ])
     }
   }

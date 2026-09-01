@@ -14,7 +14,8 @@ const { data, info } = await sharp(await readFile(SOURCE))
   .raw()
   .toBuffer({ resolveWithObject: true })
 
-const result = voxelize({ data, width: info.width, height: info.height }, { size: 64 })
+// Tuning lives in voxelize.mjs DEFAULTS, so there is one place to change it.
+const result = voxelize({ data, width: info.width, height: info.height })
 
 if (result.count === 0) {
   console.error('Voxelizer produced no voxels — check the background tolerance.')
