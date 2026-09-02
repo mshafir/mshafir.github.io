@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Color, MathUtils, Object3D, Vector3, type InstancedMesh } from 'three'
+import { Color, MathUtils, Object3D, SRGBColorSpace, Vector3, type InstancedMesh } from 'three'
 import voxelData from '../../data/voxels.json'
 import type { VoxelData } from '../../data/types'
 
@@ -8,16 +8,15 @@ const data = voxelData as VoxelData
 
 const MAX_YAW = MathUtils.degToRad(14)
 const MAX_PITCH = MathUtils.degToRad(8)
-/** Standing three-quarter turn: head-on, the relief's steps catch no light. */
-const BASE_YAW = MathUtils.degToRad(-16)
+/** A slight standing turn, so the figure reads as a volume rather than a plate. */
+const BASE_YAW = MathUtils.degToRad(-12)
 const ASSEMBLE_SECONDS = 1.2
-/** Framing is tuned for this many cells across; other grids scale to match. */
-const REFERENCE_GRID = 64
+/** World units the figure's longest axis is scaled to fill. */
+const TARGET_EXTENT = 52
 /**
  * Cube footprint within its cell; the remainder is the seam between blocks.
- * Keep it tight: wide seams open canyons between the extruded columns, and
- * wherever the view axis runs parallel to one you see straight through to the
- * background as a dark line across the face.
+ * Tight enough that you cannot see between the cubes into the hollow interior,
+ * loose enough that each block still reads as a block.
  */
 const FACE = 0.94
 /** Radians of rotation per pixel dragged. ~200px sweeps a right angle. */
@@ -38,35 +37,44 @@ function VoxelCloud({ animate }: { animate: boolean }) {
 
   // Per-voxel destinations, scatter origins, stagger delays and colors, once.
   const layout = useMemo(() => {
-    const ys = data.voxels.map((v) => v[1])
-    const minY = Math.min(...ys)
-    const span = Math.max(1, Math.max(...ys) - minY)
+    const axis = (i: number) => data.voxels.map((v) => v[i])
+    const range = (i: number) => {
+      const values = axis(i)
+      return { min: Math.min(...values), max: Math.max(...values) }
+    }
+    const [xs, ys, zs] = [range(0), range(1), range(2)]
+    const centre = new Vector3(
+      (xs.min + xs.max) / 2,
+      (ys.min + ys.max) / 2,
+      (zs.min + zs.max) / 2,
+    )
+    const span = Math.max(1, ys.max - ys.min)
+    const scatter = Math.max(xs.max - xs.min, span) * 1.4
 
-    // Each voxel spans its own front and back surface, so the bust is a
-    // rounded mass. Extruding everything to one flat plane instead looks fine
-    // head-on but collapses into a slab the moment it is dragged round.
-    const centreZ =
-      (Math.min(...data.voxels.map((v) => v[3])) +
-        Math.max(...data.voxels.map((v) => v[2]))) /
-      2
-    const scatter = data.size * 1.4
+    return data.voxels.map(([x, y, z, r, g, b]) => ({
+      target: new Vector3(x - centre.x, y - centre.y, z - centre.z),
+      origin: new Vector3(
+        x - centre.x + (Math.random() - 0.5) * scatter,
+        y - centre.y + (Math.random() - 0.5) * scatter,
+        z - centre.z + (Math.random() - 0.5) * scatter,
+      ),
+      // Bottom voxels land first, so the figure builds upward.
+      delay: ((y - ys.min) / span) * 0.45,
+      // The palette is authored in sRGB. Three's Color constructor takes
+      // working-space (linear) values, so handing it sRGB directly is what
+      // drains a flat cartoon palette to grey.
+      color: new Color().setRGB(r / 255, g / 255, b / 255, SRGBColorSpace),
+    }))
+  }, [])
 
-    return data.voxels.map(([x, y, front, back, r, g, b]) => {
-      const depth = front - back + 1
-      const z = (front + back) / 2
-      return {
-        depth,
-        target: new Vector3(x, y, z - centreZ),
-        origin: new Vector3(
-          x + (Math.random() - 0.5) * scatter,
-          y + (Math.random() - 0.5) * scatter,
-          z + (Math.random() - 0.5) * scatter,
-        ),
-        // Bottom voxels land first, so the portrait builds upward.
-        delay: ((y - minY) / span) * 0.45,
-        color: new Color(r / 255, g / 255, b / 255),
-      }
-    })
+  // Fit the figure to the frame from its own extents, so re-sculpting the
+  // model never silently changes how large it renders.
+  const fit = useMemo(() => {
+    const spread = (i: number) => {
+      const values = data.voxels.map((v) => v[i])
+      return Math.max(...values) - Math.min(...values)
+    }
+    return TARGET_EXTENT / Math.max(spread(0), spread(1), 1)
   }, [])
 
   useEffect(() => {
@@ -158,7 +166,7 @@ function VoxelCloud({ animate }: { animate: boolean }) {
         const local = MathUtils.clamp((t - voxel.delay) / (1 - voxel.delay || 1), 0, 1)
         const eased = 1 - Math.pow(1 - local, 3)
         dummy.position.lerpVectors(voxel.origin, voxel.target, eased)
-        dummy.scale.set(FACE * eased, FACE * eased, voxel.depth * eased)
+        dummy.scale.setScalar(FACE * eased)
         dummy.updateMatrix()
         mesh.setMatrixAt(i, dummy.matrix)
       })
@@ -200,13 +208,15 @@ function VoxelCloud({ animate }: { animate: boolean }) {
     )
   })
 
-  const fit = REFERENCE_GRID / data.size
   return (
-    <group scale={(size.width < 768 ? 0.75 : 1) * fit}>
+    <group scale={(size.width < 768 ? 0.8 : 1) * fit}>
       <instancedMesh ref={meshRef} args={[undefined, undefined, layout.length]}>
         {/* Unit cube; each instance scales it into its own column. */}
         <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial roughness={0.78} metalness={0.02} />
+        {/* Lambert, not standard: physically-based shading desaturates a flat
+            cartoon palette toward grey. Simple diffuse keeps the authored
+            colours and still separates the cube faces. */}
+        <meshLambertMaterial />
       </instancedMesh>
     </group>
   )

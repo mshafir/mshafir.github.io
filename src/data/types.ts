@@ -9,8 +9,7 @@ export interface Project {
 }
 
 export interface VoxelData {
-  size: number
   count: number
-  /** [x, y, zFront, zBack, r, g, b] */
+  /** [x, y, z, r, g, b] — one unit cube each */
   voxels: number[][]
 }

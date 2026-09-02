@@ -35,7 +35,7 @@ still showing it in `npm run dev`.
 
 ```bash
 npm run data:github    # re-fetch GitHub repos into src/data/projects.json
-npm run data:voxels    # rebuild the voxel portrait from assets/source/headshot.png
+npm run data:figure    # rebuild the voxel figure from scripts/lib/figure.mjs
 ```
 
 Edit `content/projects.config.json` to pin the featured order, hide a repo, or
@@ -43,8 +43,26 @@ override a description. Both outputs are committed, so a build never needs
 network access. A nightly workflow re-runs the GitHub fetch and commits it when
 stars or push dates change.
 
-Voxel tuning (grid resolution, dome and relief depth, contrast) lives in
-`DEFAULTS` at the top of `scripts/lib/voxelize.mjs`.
+## The voxel figure
+
+The hero is a hand-authored cartoon bust, not a processed photograph. It lives
+in `scripts/lib/figure.mjs` as a set of shape tests — `sample(x, y, z)` returns
+a colour or nothing — and the build keeps only the voxels with an exposed face,
+since a cube buried inside the volume can never be seen.
+
+Because it is a real 3D model rather than a photo pushed into relief, it holds
+up when you drag it all the way round instead of collapsing into a slab.
+
+To change how the figure looks, edit `PALETTE` for colour and the part
+functions (`sampleHead`, `sampleHair`, `sampleGlasses`, `sampleBody`, …) for
+shape, then run `npm run data:figure`. To see the result without a full build:
+
+```bash
+node scripts/preview-figure.mjs        # contact sheet at six angles
+```
+
+The figure is symmetric by construction, and a test enforces it — it is the
+quickest way to catch a feature that has drifted off-centre.
 
 ## Test, build, preview
 

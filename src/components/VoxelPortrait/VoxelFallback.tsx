@@ -5,8 +5,10 @@ import type { VoxelData } from '../../data/types'
 const data = voxelData as VoxelData
 
 /**
- * Flat painted version of the same voxel grid for browsers without WebGL.
- * Depth becomes brightness rather than geometry.
+ * Flat painted version of the same figure, for browsers without WebGL.
+ *
+ * Orthographic front view: voxels are drawn back to front so nearer ones win,
+ * and depth becomes brightness rather than geometry.
  */
 export function VoxelFallback() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -16,17 +18,32 @@ export function VoxelFallback() {
     const context = canvas?.getContext('2d')
     if (!canvas || !context) return
 
-    const size = data.size
-    const cell = Math.floor(canvas.width / size)
-    const half = size / 2
-    const maxZ = Math.max(...data.voxels.map((v) => v[2]), 1)
+    const xs = data.voxels.map((v) => v[0])
+    const ys = data.voxels.map((v) => v[1])
+    const zs = data.voxels.map((v) => v[2])
+    const minX = Math.min(...xs)
+    const minY = Math.min(...ys)
+    const minZ = Math.min(...zs)
+    const maxZ = Math.max(...zs)
+    const width = Math.max(...xs) - minX + 1
+    const height = Math.max(...ys) - minY + 1
+
+    const cell = Math.max(1, Math.floor(Math.min(canvas.width / width, canvas.height / height)))
+    const offsetX = (canvas.width - width * cell) / 2
+    const offsetY = (canvas.height - height * cell) / 2
+    const depth = Math.max(1, maxZ - minZ)
 
     context.clearRect(0, 0, canvas.width, canvas.height)
-    for (const [x, y, z, , r, g, b] of data.voxels) {
-      // Nearer voxels read brighter, which reads as depth on a flat surface.
-      const shade = 0.55 + 0.45 * (z / maxZ)
+    for (const [x, y, z, r, g, b] of [...data.voxels].sort((a, b) => a[2] - b[2])) {
+      // Nearer voxels read brighter, which stands in for depth on a flat plane.
+      const shade = 0.62 + 0.38 * ((z - minZ) / depth)
       context.fillStyle = `rgb(${r * shade} ${g * shade} ${b * shade})`
-      context.fillRect((x + half) * cell, (half - y) * cell, cell, cell)
+      context.fillRect(
+        offsetX + (x - minX) * cell,
+        offsetY + (height - 1 - (y - minY)) * cell,
+        cell,
+        cell,
+      )
     }
   }, [])
 

@@ -11,8 +11,8 @@
     "build": "vite-react-ssg build",
     "preview": "node scripts/preview.mjs",
     "typecheck": "tsc --noEmit",
-    "data:voxels": "node scripts/build-voxels.mjs",
-    "data:github": "node scripts/fetch-github.mjs"
+    "data:github": "node scripts/fetch-github.mjs",
+    "data:figure": "node scripts/build-figure.mjs"
   },
   "keywords": [],
   "author": "",
