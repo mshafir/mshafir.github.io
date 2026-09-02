@@ -54,6 +54,15 @@
     "featured": true
   },
   {
+    "name": "mshafir.github.io",
+    "url": "https://github.com/mshafir/mshafir.github.io",
+    "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
+    "language": "TypeScript",
+    "stars": 0,
+    "pushedAt": "2026-09-01T13:33:23Z",
+    "featured": false
+  },
+  {
     "name": "reactlit-next-starter",
     "url": "https://github.com/mshafir/reactlit-next-starter",
     "blurb": "Starter for Reaclit and Nextjs",
