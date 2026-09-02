@@ -37,11 +37,12 @@ describe('buildFigure', () => {
     expect(at.has('0,6,0')).toBe(false)
   })
 
-  it('is symmetric about the vertical axis apart from the expression', () => {
-    // The smirk and the cocked brow are the only intended asymmetries, so
-    // everything else mirroring is a real invariant: it catches a feature that
-    // has drifted off-centre, which is very hard to see by eye at this scale.
-    const expression = new Set([colourKey(PALETTE.mouth), colourKey(PALETTE.brow)])
+  it('is symmetric about the vertical axis apart from the mouth', () => {
+    // The smirk is the only intended asymmetry, so everything else mirroring is
+    // a real invariant: it catches a feature that has drifted off-centre, which
+    // is very hard to see by eye at this scale. The brows are level, and this
+    // is what keeps them that way.
+    const expression = new Set([colourKey(PALETTE.mouth)])
     for (const [x, y, z, ...colour] of figure.voxels) {
       if (expression.has(colourKey(colour))) continue
       const mirrored = at.get(`${-x},${y},${z}`)
@@ -60,16 +61,37 @@ describe('buildFigure', () => {
     expect(Math.abs(meanY(side(1)) - meanY(side(-1)))).toBeGreaterThan(0.4)
   })
 
-  it('raises the brow on the smirking side', () => {
+  it('keeps the brows level with each other', () => {
     const brows = figure.voxels.filter((v) => colourKey(v.slice(3)) === colourKey(PALETTE.brow))
-    const top = (sign) => Math.max(...brows.filter((v) => Math.sign(v[0]) === sign).map((v) => v[1]))
-    const mouth = figure.voxels.filter((v) => colourKey(v.slice(3)) === colourKey(PALETTE.mouth))
-    const mouthMean = (sign) => {
-      const list = mouth.filter((v) => Math.sign(v[0]) === sign)
-      return list.reduce((sum, v) => sum + v[1], 0) / Math.max(1, list.length)
+    const rows = (sign) => brows.filter((v) => Math.sign(v[0]) === sign).map((v) => v[1])
+    expect(Math.max(...rows(1))).toBe(Math.max(...rows(-1)))
+    expect(Math.min(...rows(1))).toBe(Math.min(...rows(-1)))
+  })
+
+  it('keeps the brows clear of the glasses', () => {
+    const lowest = (colour) =>
+      Math.min(
+        ...figure.voxels.filter((v) => colourKey(v.slice(3)) === colourKey(colour)).map((v) => v[1]),
+      )
+    const highestFrame = Math.max(
+      ...figure.voxels
+        .filter((v) => colourKey(v.slice(3)) === colourKey(PALETTE.frame))
+        .map((v) => v[1]),
+    )
+    // Touching rims turn brow and frame into one dark bar across the face.
+    expect(lowest(PALETTE.brow)).toBeGreaterThan(highestFrame)
+  })
+
+  it('tapers toward the chin rather than staying round', () => {
+    const skin = figure.voxels.filter((v) => colourKey(v.slice(3)) === colourKey(PALETTE.skin))
+    const widthAt = (y) => {
+      const row = skin.filter((v) => v[1] === y).map((v) => v[0])
+      return row.length ? Math.max(...row) - Math.min(...row) : 0
     }
-    const smirkSide = mouthMean(1) > mouthMean(-1) ? 1 : -1
-    expect(top(smirkSide)).toBeGreaterThan(top(-smirkSide))
+    const cheek = widthAt(5)
+    const jaw = widthAt(-1)
+    expect(jaw).toBeGreaterThan(0)
+    expect(jaw).toBeLessThan(cheek * 0.85)
   })
 
   it('includes the features that make it recognisable', () => {

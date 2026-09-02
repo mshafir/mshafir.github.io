@@ -46,24 +46,53 @@ const ellipsoid = (x, y, z, cx, cy, cz, rx, ry, rz) => {
 
 const inside = (...args) => ellipsoid(...args) <= 1
 
-// Head. Slightly taller than wide, flattened a little front to back.
-const HEAD = { cx: 0, cy: 6, cz: 0, rx: 9, ry: 9.2, rz: 8.2 }
+// Head. Longer than it is wide, and flattened a little front to back.
+const HEAD = { cx: 0, cy: 6, cz: 0, rx: 8.3, ry: 9.6, rz: 7.9 }
 
-const inHead = (x, y, z) =>
-  inside(x, y, z, HEAD.cx, HEAD.cy, HEAD.cz, HEAD.rx, HEAD.ry, HEAD.rz)
+/**
+ * How much narrower the head is at a given height.
+ *
+ * A bare ellipsoid gives a ball: full width right down to where it closes off,
+ * so the jaw is as broad as the cheekbones and the face reads round. Squeezing
+ * the lower half is what produces a jaw and a chin.
+ */
+function jaw(y) {
+  const chin = HEAD.cy - HEAD.ry
+  const cheek = HEAD.cy - 0.5
+  const t = Math.min(1, Math.max(0, (y - chin) / (cheek - chin)))
+  return 0.76 + 0.24 * t
+}
+
+const inHead = (x, y, z) => {
+  const k = jaw(y)
+  return inside(x, y, z, HEAD.cx, HEAD.cy, HEAD.cz, HEAD.rx * k, HEAD.ry, HEAD.rz * k)
+}
 
 /** The shell just outside the skull, where hair sits. */
-const inHairShell = (x, y, z) =>
-  inside(x, y, z, HEAD.cx, HEAD.cy, HEAD.cz, HEAD.rx + 1.4, HEAD.ry + 1.3, HEAD.rz + 1.4)
+const inHairShell = (x, y, z) => {
+  const k = jaw(y)
+  return inside(
+    x,
+    y,
+    z,
+    HEAD.cx,
+    HEAD.cy,
+    HEAD.cz,
+    HEAD.rx * k + 1.4,
+    HEAD.ry + 1.3,
+    HEAD.rz * k + 1.4,
+  )
+}
 
 const EYE = { y: 7.2, x: 4.2 }
-const BROW_Y = EYE.y + 3.6
+const BROW_Y = EYE.y + 4.1
 const NOSE_Y = 4.2
 const MOUTH_Y = 0.8
 /**
  * The smirk. One corner lifts and that side runs a little longer, which is the
  * whole expression: a symmetric curve reads as a plain smile no matter how
- * much you bend it.
+ * much you bend it. The brows stay level — lifting one read as lopsided rather
+ * than wry.
  */
 const SMIRK_LIFT = 0.19
 const SMIRK_SIDE = 1
@@ -72,21 +101,20 @@ const SMIRK_SIDE = 1
  * Where the hair starts, as a function of depth. It rises toward the front so
  * there is a forehead, and falls at the back so the hair covers the nape.
  */
-const hairlineAt = (z) => 11.2 + z * 0.26
+const hairlineAt = (z) => 11.7 + z * 0.26
 
 /** Half-width of the head at a given height and depth. */
 function headHalfWidth(y, z) {
-  const t = 1 - ((y - HEAD.cy) / HEAD.ry) ** 2 - ((z - HEAD.cz) / HEAD.rz) ** 2
-  return t <= 0 ? -Infinity : HEAD.rx * Math.sqrt(t)
+  const k = jaw(y)
+  const t = 1 - ((y - HEAD.cy) / HEAD.ry) ** 2 - ((z - HEAD.cz) / (HEAD.rz * k)) ** 2
+  return t <= 0 ? -Infinity : HEAD.rx * k * Math.sqrt(t)
 }
 
 /** Front surface of the head at a given x/y, so features can sit on it. */
 function faceDepth(x, y) {
-  const t =
-    1 -
-    ((x - HEAD.cx) / HEAD.rx) ** 2 -
-    ((y - HEAD.cy) / HEAD.ry) ** 2
-  return t <= 0 ? -Infinity : HEAD.rz * Math.sqrt(t)
+  const k = jaw(y)
+  const t = 1 - ((x - HEAD.cx) / (HEAD.rx * k)) ** 2 - ((y - HEAD.cy) / HEAD.ry) ** 2
+  return t <= 0 ? -Infinity : HEAD.rz * k * Math.sqrt(t)
 }
 
 // --- the model -----------------------------------------------------------
@@ -109,18 +137,15 @@ function sampleHead(x, y, z) {
     for (const side of [-1, 1]) {
       const dx = x - side * EYE.x
       const r = Math.hypot(dx, (y - EYE.y) * 1.15)
-      if (r <= 0.95) return PALETTE.eye
-      if (r <= 1.85) return PALETTE.sclera
+      if (r <= 0.85) return PALETTE.eye
+      if (r <= 1.6) return PALETTE.sclera
     }
 
     // Brows: a short bar above each lens, angled slightly inward.
     for (const side of [-1, 1]) {
       const dx = x - side * (EYE.x + 0.2)
-      // The brow on the smirking side rides a little higher, which is what
-      // turns the mouth from a crooked smile into an expression.
-      const cocked = side === SMIRK_SIDE ? 0.85 : 0
-      const lift = BROW_Y + cocked - Math.abs(dx) * 0.18
-      if (Math.abs(dx) <= 2.1 && y >= lift - 0.5 && y <= lift + 0.5) return PALETTE.brow
+      const lift = BROW_Y - Math.abs(dx) * 0.18
+      if (Math.abs(dx) <= 2.2 && y >= lift - 0.75 && y <= lift + 0.75) return PALETTE.brow
     }
 
     // The underside of the jaw falls into shadow.
@@ -147,7 +172,7 @@ function sampleHair(x, y, z) {
 
 function sampleEars(x, y, z) {
   for (const side of [-1, 1]) {
-    if (inside(x, y, z, side * 8.4, 6.2, -0.8, 1.5, 2.9, 2.3)) return PALETTE.ear
+    if (inside(x, y, z, side * 7.7, 6.2, -0.8, 1.4, 2.9, 2.2)) return PALETTE.ear
   }
   return null
 }
@@ -169,13 +194,13 @@ function sampleGlasses(x, y, z) {
       const dx = x - side * EYE.x
       const r = Math.hypot(dx, (y - EYE.y) * 1.1)
       // A thin rim. Anything heavier swallows the eye and reads as goggles.
-      if (Math.abs(r - 2.3) <= 0.55) return PALETTE.frame
+      if (Math.abs(r - 2.1) <= 0.55) return PALETTE.frame
       // One short diagonal glint in the upper outer corner of each lens.
       // Measured outward from the eye rather than along +x, so the two lenses
       // mirror each other; a raw dx makes the left glint run the wrong way.
       const out = side * dx - 1.2
       const gy = y - EYE.y - 1.1
-      if (r < 2.2 && Math.abs(out - gy) < 0.55 && out + gy > -0.9) return PALETTE.lens
+      if (r < 2 && Math.abs(out - gy) < 0.55 && out + gy > -0.9) return PALETTE.lens
     }
     // Bridge across the nose.
     if (Math.abs(x) <= EYE.x - 2.3 && Math.abs(y - EYE.y - 0.4) <= 0.45) return PALETTE.frame
@@ -197,7 +222,7 @@ function sampleGlasses(x, y, z) {
 
 function sampleBody(x, y, z) {
   // Neck.
-  if (y >= -6 && y < -2 && x * x + z * z <= 3.1 ** 2) {
+  if (y >= -6 && y < -2 && x * x + z * z <= 2.8 ** 2) {
     return y < -4 ? PALETTE.skinShade : PALETTE.skin
   }
 
