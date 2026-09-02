@@ -7,16 +7,16 @@
  */
 
 export const DEFAULTS = {
-  size: 96, // grid resolution (N x N cells)
-  domeDepth: 14, // voxels of curvature across the head
-  reliefDepth: 7, // voxels of feature relief from brightness
+  size: 40, // grid resolution (N x N cells) — deliberately chunky
+  domeDepth: 12, // cells of curvature across the head
+  reliefDepth: 7, // cells of feature relief from brightness
   bgTolerance: 28, // euclidean RGB distance from the border reference color
   greenBias: 1.0, // g must exceed r by this factor to read as foliage bokeh
   // A headshot averaged down to one color per cell is very low contrast, and
   // at portrait scale the eyes, glasses and hairline wash into the skin.
   // Pushing each channel away from the subject's mean restores the features.
-  contrast: 1.45,
-  saturation: 1.15,
+  contrast: 1.7,
+  saturation: 1.2,
 }
 
 const luma = (r, g, b) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255

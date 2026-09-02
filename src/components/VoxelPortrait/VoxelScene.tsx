@@ -9,11 +9,17 @@ const data = voxelData as VoxelData
 const MAX_YAW = MathUtils.degToRad(14)
 const MAX_PITCH = MathUtils.degToRad(8)
 /** Standing three-quarter turn: head-on, the relief's steps catch no light. */
-const BASE_YAW = MathUtils.degToRad(-10)
+const BASE_YAW = MathUtils.degToRad(-16)
 const ASSEMBLE_SECONDS = 1.2
-const SCATTER_RADIUS = 60
 /** Framing is tuned for this many cells across; other grids scale to match. */
 const REFERENCE_GRID = 64
+/**
+ * Cube footprint within its cell; the remainder is the seam between blocks.
+ * Keep it tight: wide seams open canyons between the extruded columns, and
+ * wherever the view axis runs parallel to one you see straight through to the
+ * background as a dark line across the face.
+ */
+const FACE = 0.94
 
 function VoxelCloud({ animate }: { animate: boolean }) {
   const meshRef = useRef<InstancedMesh>(null)
@@ -24,22 +30,33 @@ function VoxelCloud({ animate }: { animate: boolean }) {
 
   // Per-voxel destinations, scatter origins, stagger delays and colors, once.
   const layout = useMemo(() => {
-    const half = data.size / 2
     const ys = data.voxels.map((v) => v[1])
+    const zs = data.voxels.map((v) => v[2])
     const minY = Math.min(...ys)
     const span = Math.max(1, Math.max(...ys) - minY)
 
-    return data.voxels.map(([x, y, z, r, g, b]) => ({
-      target: new Vector3(x, y, z - half * 0.35),
-      origin: new Vector3(
-        x + (Math.random() - 0.5) * SCATTER_RADIUS,
-        y + (Math.random() - 0.5) * SCATTER_RADIUS,
-        z + (Math.random() - 0.5) * SCATTER_RADIUS,
-      ),
-      // Bottom voxels land first, so the portrait builds upward.
-      delay: ((y - minY) / span) * 0.45,
-      color: new Color(r / 255, g / 255, b / 255),
-    }))
+    // Extrude every voxel back to one base plane instead of leaving it a
+    // single floating cube: the columns give the relief real mass, and their
+    // side faces are what catch the raking light and read as depth.
+    const baseZ = Math.min(...zs) - 1
+    const centreZ = (baseZ + Math.max(...zs)) / 2
+    const scatter = data.size * 1.4
+
+    return data.voxels.map(([x, y, z, r, g, b]) => {
+      const depth = z - baseZ
+      return {
+        depth,
+        target: new Vector3(x, y, baseZ + depth / 2 - centreZ),
+        origin: new Vector3(
+          x + (Math.random() - 0.5) * scatter,
+          y + (Math.random() - 0.5) * scatter,
+          z + (Math.random() - 0.5) * scatter,
+        ),
+        // Bottom voxels land first, so the portrait builds upward.
+        delay: ((y - minY) / span) * 0.45,
+        color: new Color(r / 255, g / 255, b / 255),
+      }
+    })
   }, [])
 
   useEffect(() => {
@@ -74,7 +91,7 @@ function VoxelCloud({ animate }: { animate: boolean }) {
         const local = MathUtils.clamp((t - voxel.delay) / (1 - voxel.delay || 1), 0, 1)
         const eased = 1 - Math.pow(1 - local, 3)
         dummy.position.lerpVectors(voxel.origin, voxel.target, eased)
-        dummy.scale.setScalar(0.9 * eased)
+        dummy.scale.set(FACE * eased, FACE * eased, voxel.depth * eased)
         dummy.updateMatrix()
         mesh.setMatrixAt(i, dummy.matrix)
       })
@@ -104,7 +121,8 @@ function VoxelCloud({ animate }: { animate: boolean }) {
   return (
     <group scale={(size.width < 768 ? 0.75 : 1) * fit}>
       <instancedMesh ref={meshRef} args={[undefined, undefined, layout.length]}>
-        <boxGeometry args={[0.92, 0.92, 0.92]} />
+        {/* Unit cube; each instance scales it into its own column. */}
+        <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial roughness={0.78} metalness={0.02} />
       </instancedMesh>
     </group>
@@ -120,13 +138,15 @@ export default function VoxelScene({ animate }: { animate: boolean }) {
       // ACES tone mapping (r3f's default) washes the pale skin tones flat.
       flat
     >
-      <ambientLight intensity={0.44} />
-      {/* Raking key from the side: it is the angle, not the brightness, that
-          makes the voxel steps read as depth. */}
-      <directionalLight position={[60, 42, 48]} intensity={2.05} />
-      <directionalLight position={[-45, -12, 40]} intensity={0.5} color="#8FA3C4" />
+      {/* Keep ambient low. It is the difference between a block's top, front
+          and side faces that reads as depth, and ambient light flattens all
+          three toward the same value. */}
+      <ambientLight intensity={0.26} />
+      {/* Key from high and to the side, so every step's top face catches it. */}
+      <directionalLight position={[45, 78, 40]} intensity={2.15} />
+      <directionalLight position={[-50, -18, 35]} intensity={0.5} color="#8FA3C4" />
       {/* Cyan rim light lifts the silhouette off the near-black ground. */}
-      <directionalLight position={[-55, 18, -30]} intensity={1.1} color="#22D3EE" />
+      <directionalLight position={[-55, 18, -30]} intensity={1.25} color="#22D3EE" />
       <VoxelCloud animate={animate} />
     </Canvas>
   )
