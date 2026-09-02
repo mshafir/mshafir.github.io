@@ -22,7 +22,7 @@ export function VoxelFallback() {
     const maxZ = Math.max(...data.voxels.map((v) => v[2]), 1)
 
     context.clearRect(0, 0, canvas.width, canvas.height)
-    for (const [x, y, z, r, g, b] of data.voxels) {
+    for (const [x, y, z, , r, g, b] of data.voxels) {
       // Nearer voxels read brighter, which reads as depth on a flat surface.
       const shade = 0.55 + 0.45 * (z / maxZ)
       context.fillStyle = `rgb(${r * shade} ${g * shade} ${b * shade})`

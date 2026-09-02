@@ -39,7 +39,7 @@ describe('voxelize', () => {
 
   it('keeps only subject-colored voxels', () => {
     const result = voxelize(makeFixture(128, 128, 64), { size })
-    for (const [, , , r, g, b] of result.voxels) {
+    for (const [, , , , r, g, b] of result.voxels) {
       expect(r).toBeGreaterThan(g)
       expect(r).toBeGreaterThan(b)
     }
@@ -53,6 +53,13 @@ describe('voxelize', () => {
     expect(Math.abs(Math.min(...ys) + Math.max(...ys))).toBeLessThanOrEqual(1)
   })
 
+  it('gives every voxel a back surface behind its front surface', () => {
+    const result = voxelize(makeFixture(128, 128, 64), { size })
+    for (const [, , front, back] of result.voxels) {
+      expect(back).toBeLessThan(front)
+    }
+  })
+
   it('assigns depth so central cells sit forward of edge cells', () => {
     const result = voxelize(makeFixture(128, 128, 64), { size })
     const byDistance = [...result.voxels].sort(
@@ -61,12 +68,102 @@ describe('voxelize', () => {
     expect(byDistance[0][2]).toBeGreaterThan(byDistance[byDistance.length - 1][2])
   })
 
-  it('emits integer tuples of exactly six numbers', () => {
+  it('emits integer tuples of exactly seven numbers', () => {
     const result = voxelize(makeFixture(128, 128, 64), { size })
     for (const v of result.voxels) {
-      expect(v).toHaveLength(6)
+      expect(v).toHaveLength(7)
       for (const n of v) expect(Number.isInteger(n)).toBe(true)
     }
+  })
+
+  it('posterises the subject to at most paletteSize flat colours', () => {
+    // A gradient subject: without quantisation this would be ~16 distinct
+    // colours per row, which is exactly the photo-real look we do not want.
+    const width = 128
+    const height = 128
+    const data = new Uint8Array(width * height * 3)
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 3
+        const inSquare = x >= 32 && x < 96 && y >= 32 && y < 96
+        if (inSquare) {
+          data[i] = 60 + x
+          data[i + 1] = 20
+          data[i + 2] = 20
+        } else {
+          data[i] = 40
+          data[i + 1] = 160
+          data[i + 2] = 60
+        }
+      }
+    }
+    const result = voxelize({ data, width, height }, { size, paletteSize: 4 })
+    const distinct = new Set(result.voxels.map((v) => `${v[4]},${v[5]},${v[6]}`))
+    expect(distinct.size).toBeGreaterThan(1)
+    expect(distinct.size).toBeLessThanOrEqual(4)
+  })
+
+  it('terraces relief into at most reliefSteps levels', () => {
+    const width = 128
+    const height = 128
+    const data = new Uint8Array(width * height * 3)
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 3
+        const inSquare = x >= 32 && x < 96 && y >= 32 && y < 96
+        if (inSquare) {
+          // A smooth brightness ramp: unstepped, this would give many depths.
+          data[i] = 40 + x
+          data[i + 1] = 30 + x
+          data[i + 2] = 30
+        } else {
+          data[i] = 40
+          data[i + 1] = 160
+          data[i + 2] = 60
+        }
+      }
+    }
+    // Flatten the dome so the only remaining depth is the relief itself.
+    const result = voxelize({ data, width, height }, { size, domeDepth: 0, reliefSteps: 3 })
+    const depths = new Set(result.voxels.map((v) => v[2]))
+    expect(depths.size).toBeGreaterThan(1)
+    expect(depths.size).toBeLessThanOrEqual(3)
+  })
+
+  it('keeps relief independent of the colour palette', () => {
+    const width = 128
+    const height = 128
+    const data = new Uint8Array(width * height * 3)
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 3
+        const inSquare = x >= 32 && x < 96 && y >= 32 && y < 96
+        if (inSquare) {
+          data[i] = 40 + x
+          data[i + 1] = 30 + x
+          data[i + 2] = 30
+        } else {
+          data[i] = 40
+          data[i + 1] = 160
+          data[i + 2] = 60
+        }
+      }
+    }
+    // Far fewer colours than relief levels: depth must not collapse with them.
+    const result = voxelize({ data, width, height }, {
+      size, domeDepth: 0, reliefSteps: 4, paletteSize: 2,
+    })
+    const colours = new Set(result.voxels.map((v) => `${v[4]},${v[5]},${v[6]}`))
+    const depths = new Set(result.voxels.map((v) => v[2]))
+    expect(colours.size).toBeLessThanOrEqual(2)
+    expect(depths.size).toBeGreaterThan(colours.size)
+  })
+
+  it('is deterministic across runs', () => {
+    const fixture = makeFixture(128, 128, 64)
+    const a = voxelize(fixture, { size })
+    const b = voxelize(fixture, { size })
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b))
   })
 
   it('returns nothing when the whole image is background', () => {

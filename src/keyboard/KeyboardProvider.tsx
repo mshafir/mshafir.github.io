@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -41,6 +42,17 @@ interface KeyboardContextValue {
 }
 
 const KeyboardContext = createContext<KeyboardContextValue | null>(null)
+
+/**
+ * Scopes register in a layout effect so registration lands in the same commit
+ * that put the list in the DOM.
+ *
+ * With a plain effect there is a window after a route renders where the new
+ * list is on screen but its scope is not registered yet, and a j pressed in
+ * that window is silently dropped. useLayoutEffect would warn during
+ * prerender, hence the isomorphic switch.
+ */
+const useRegistrationEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
 function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false
@@ -147,7 +159,7 @@ export function useKeyboardScope(scope: ScopeDefinition): void {
 
   const register = context?.register
 
-  useEffect(() => {
+  useRegistrationEffect(() => {
     if (!register) return
     const registered: RegisteredScope = {
       id,

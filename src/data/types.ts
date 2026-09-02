@@ -11,6 +11,6 @@ export interface Project {
 export interface VoxelData {
   size: number
   count: number
-  /** [x, y, z, r, g, b] */
+  /** [x, y, zFront, zBack, r, g, b] */
   voxels: number[][]
 }
