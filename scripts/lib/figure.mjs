@@ -24,9 +24,13 @@ export const PALETTE = {
   eye: [46, 33, 26],
   mouth: [150, 78, 72],
   ear: [232, 186, 148],
-  collar: [232, 230, 225],
-  jacket: [38, 47, 60],
-  jacketDark: [28, 35, 46],
+  knit: [52, 64, 86],
+  knitSleeve: [43, 54, 73],
+  knitBack: [32, 41, 56],
+  knitStripe: [74, 92, 119],
+  // The ribbed neckband picks up the site's accent, so the figure belongs to
+  // the page it sits on rather than floating in front of it.
+  knitBand: [46, 116, 134],
 }
 
 export const BOUNDS = { x: 15, y: 20, z: 13 }
@@ -56,6 +60,13 @@ const EYE = { y: 7.2, x: 4.2 }
 const BROW_Y = EYE.y + 3.6
 const NOSE_Y = 4.2
 const MOUTH_Y = 0.8
+/**
+ * The smirk. One corner lifts and that side runs a little longer, which is the
+ * whole expression: a symmetric curve reads as a plain smile no matter how
+ * much you bend it.
+ */
+const SMIRK_LIFT = 0.19
+const SMIRK_SIDE = 1
 
 /**
  * Where the hair starts, as a function of depth. It rises toward the front so
@@ -86,9 +97,11 @@ function sampleHead(x, y, z) {
   const onFace = z > 0 && z >= surface - 1.6
 
   if (onFace) {
-    // Mouth: a shallow smile, lifting at the corners.
-    const smile = MOUTH_Y + 0.08 * x * x
-    if (Math.abs(x) <= 3.8 && y >= smile - 0.55 && y <= smile + 0.55) return PALETTE.mouth
+    // Mouth: a smirk, tilted up toward one side.
+    const lifted = SMIRK_SIDE * x > 0
+    const line = MOUTH_Y + 0.05 * x * x + SMIRK_LIFT * SMIRK_SIDE * x
+    const reach = lifted ? 4.1 : 3.1
+    if (Math.abs(x) <= reach && y >= line - 0.55 && y <= line + 0.55) return PALETTE.mouth
 
     // Eyes: a light sclera with a dark iris. Without the light ring the iris
     // sits at the same value as the frames and the whole thing reads as one
@@ -103,7 +116,10 @@ function sampleHead(x, y, z) {
     // Brows: a short bar above each lens, angled slightly inward.
     for (const side of [-1, 1]) {
       const dx = x - side * (EYE.x + 0.2)
-      const lift = BROW_Y - Math.abs(dx) * 0.18
+      // The brow on the smirking side rides a little higher, which is what
+      // turns the mouth from a crooked smile into an expression.
+      const cocked = side === SMIRK_SIDE ? 0.85 : 0
+      const lift = BROW_Y + cocked - Math.abs(dx) * 0.18
       if (Math.abs(dx) <= 2.1 && y >= lift - 0.5 && y <= lift + 0.5) return PALETTE.brow
     }
 
@@ -185,16 +201,26 @@ function sampleBody(x, y, z) {
     return y < -4 ? PALETTE.skinShade : PALETTE.skin
   }
 
-  if (y < -6 && y >= -13) {
+  if (y < -6 && y >= -14) {
     const spread = 1 + (-6 - y) * 0.34
     const rx = 5.6 * spread
     const rz = 4.2
     if ((x / rx) ** 2 + (z / rz) ** 2 > 1) return null
 
-    // An open collar: a V of shirt at the front, jacket everywhere else.
-    const vee = Math.abs(x) * 0.85 - 7.2
-    if (z > 0 && y > vee && Math.abs(x) < 5) return PALETTE.collar
-    return z < -1 ? PALETTE.jacketDark : PALETTE.jacket
+    // Ribbed neckband around the top of the garment.
+    if (y >= -8.2) return PALETTE.knitBand
+
+    // Two knit stripes across the chest, and the raglan seam where the sleeve
+    // meets the body. Flat colour reads as a slab at this resolution; these
+    // few lines are what make it read as a garment.
+    if (z > -1) {
+      // Cells are sampled at integers, so these have to land on whole rows;
+      // a half-integer centre here matches nothing at all.
+      if (y === -10 || y === -12) return PALETTE.knitStripe
+    }
+    if (Math.abs(x) > rx * 0.62) return PALETTE.knitSleeve
+
+    return z < -1.5 ? PALETTE.knitBack : PALETTE.knit
   }
   return null
 }

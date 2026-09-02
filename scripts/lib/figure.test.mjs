@@ -37,16 +37,44 @@ describe('buildFigure', () => {
     expect(at.has('0,6,0')).toBe(false)
   })
 
-  it('is symmetric about the vertical axis', () => {
+  it('is symmetric about the vertical axis apart from the expression', () => {
+    // The smirk and the cocked brow are the only intended asymmetries, so
+    // everything else mirroring is a real invariant: it catches a feature that
+    // has drifted off-centre, which is very hard to see by eye at this scale.
+    const expression = new Set([colourKey(PALETTE.mouth), colourKey(PALETTE.brow)])
     for (const [x, y, z, ...colour] of figure.voxels) {
+      if (expression.has(colourKey(colour))) continue
       const mirrored = at.get(`${-x},${y},${z}`)
+      if (mirrored && expression.has(colourKey(mirrored))) continue
       expect(mirrored, `no mirror for ${x},${y},${z}`).toBeDefined()
       expect(colourKey(mirrored)).toBe(colourKey(colour))
     }
   })
 
+  it('smirks rather than smiling', () => {
+    const mouth = figure.voxels.filter((v) => colourKey(v.slice(3)) === colourKey(PALETTE.mouth))
+    const side = (sign) => mouth.filter((v) => Math.sign(v[0]) === sign)
+    const meanY = (list) => list.reduce((sum, v) => sum + v[1], 0) / Math.max(1, list.length)
+
+    // One corner has to sit higher than the other, or it is just a smile.
+    expect(Math.abs(meanY(side(1)) - meanY(side(-1)))).toBeGreaterThan(0.4)
+  })
+
+  it('raises the brow on the smirking side', () => {
+    const brows = figure.voxels.filter((v) => colourKey(v.slice(3)) === colourKey(PALETTE.brow))
+    const top = (sign) => Math.max(...brows.filter((v) => Math.sign(v[0]) === sign).map((v) => v[1]))
+    const mouth = figure.voxels.filter((v) => colourKey(v.slice(3)) === colourKey(PALETTE.mouth))
+    const mouthMean = (sign) => {
+      const list = mouth.filter((v) => Math.sign(v[0]) === sign)
+      return list.reduce((sum, v) => sum + v[1], 0) / Math.max(1, list.length)
+    }
+    const smirkSide = mouthMean(1) > mouthMean(-1) ? 1 : -1
+    expect(top(smirkSide)).toBeGreaterThan(top(-smirkSide))
+  })
+
   it('includes the features that make it recognisable', () => {
-    for (const part of ['skin', 'hair', 'frame', 'eye', 'sclera', 'brow', 'mouth', 'jacket']) {
+    const parts = ['skin', 'hair', 'frame', 'eye', 'sclera', 'brow', 'mouth', 'knit', 'knitBand', 'knitStripe']
+    for (const part of parts) {
       expect(used.has(colourKey(PALETTE[part])), `${part} missing`).toBe(true)
     }
   })
