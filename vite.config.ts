@@ -1,7 +1,7 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
-import { markdown } from './plugins/vite-plugin-markdown'
+import { markdown } from './plugins/vite-plugin-markdown.ts'
 
 export default defineConfig({
   base: '/',

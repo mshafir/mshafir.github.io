@@ -1,7 +1,7 @@
 import { basename } from 'node:path'
 import type { Plugin } from 'vite'
 import { createHighlighter, type Highlighter as ShikiHighlighter } from 'shiki'
-import { parsePost } from './markdown/parse'
+import { parsePost } from './markdown/parse.ts'
 
 /**
  * Compiles `content/posts/*.md` into JS modules exporting a Post object.
