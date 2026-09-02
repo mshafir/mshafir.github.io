@@ -46,6 +46,30 @@ const ellipsoid = (x, y, z, cx, cy, cz, rx, ry, rz) => {
 
 const inside = (...args) => ellipsoid(...args) <= 1
 
+/**
+ * Deterministic hash in [0, 1).
+ *
+ * The hair is scruffed with noise, and the committed voxels.json has to be
+ * reproducible, so this stands in for a random number generator: same input,
+ * same mess, every build.
+ */
+function hash2(a, b) {
+  let h = Math.imul(a | 0, 374761393) ^ Math.imul(b | 0, 668265263)
+  h = Math.imul(h ^ (h >>> 13), 1274126177)
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296
+}
+
+/**
+ * Low-frequency noise over the head's footprint.
+ *
+ * Sampling the hash per voxel gives static; quantising the input first makes
+ * the variation clump into tufts a few voxels across, which is what reads as
+ * untidy hair rather than noise.
+ */
+function clump(x, z, scale, seed) {
+  return hash2(Math.floor(x / scale) + seed * 131, Math.floor(z / scale) - seed * 57)
+}
+
 // Head. Longer than it is wide, and flattened a little front to back.
 const HEAD = { cx: 0, cy: 6, cz: 0, rx: 8.3, ry: 9.6, rz: 7.9 }
 
@@ -68,9 +92,15 @@ const inHead = (x, y, z) => {
   return inside(x, y, z, HEAD.cx, HEAD.cy, HEAD.cz, HEAD.rx * k, HEAD.ry, HEAD.rz * k)
 }
 
-/** The shell just outside the skull, where hair sits. */
+/**
+ * The shell just outside the skull, where hair sits.
+ *
+ * Its thickness varies with the noise, so the outer surface is lumpy. A
+ * constant offset here is exactly what made the hair read as a helmet.
+ */
 const inHairShell = (x, y, z) => {
   const k = jaw(y)
+  const puff = 0.9 + clump(x, z, 2.4, 2) * 1.7
   return inside(
     x,
     y,
@@ -78,9 +108,9 @@ const inHairShell = (x, y, z) => {
     HEAD.cx,
     HEAD.cy,
     HEAD.cz,
-    HEAD.rx * k + 1.4,
-    HEAD.ry + 1.3,
-    HEAD.rz * k + 1.4,
+    HEAD.rx * k + puff,
+    HEAD.ry + puff * 0.9,
+    HEAD.rz * k + puff,
   )
 }
 
@@ -98,10 +128,22 @@ const SMIRK_LIFT = 0.19
 const SMIRK_SIDE = 1
 
 /**
- * Where the hair starts, as a function of depth. It rises toward the front so
- * there is a forehead, and falls at the back so the hair covers the nape.
+ * Where the hair starts. It rises toward the front so there is a forehead, and
+ * falls at the back so the hair covers the nape. The noise term ragged-edges
+ * it, and the last term recedes one temple a little, which stops the front
+ * from reading as a drawn-on line.
  */
-const hairlineAt = (z) => 11.7 + z * 0.26
+function hairlineAt(x, z) {
+  const ragged = (clump(x, z, 3, 1) - 0.5) * 1.8
+  const temple = x > 1.5 && z > 2 ? 0.9 : 0
+  const base = 11.9 + z * 0.26 + ragged + temple
+  // Over the face itself, keep a floor: a ragged dip that falls this far is not
+  // a fringe, it is hair growing across the eyebrows.
+  return z > 1 && Math.abs(x) < 6.5 ? Math.max(base, 12.4) : base
+}
+
+/** True where a tuft stands proud of the crown. */
+const isTuft = (x, z) => clump(x, z, 2, 3) > 0.78
 
 /** Half-width of the head at a given height and depth. */
 function headHalfWidth(y, z) {
@@ -153,8 +195,7 @@ function sampleHead(x, y, z) {
   }
 
   // Hair covers the crown and the back, leaving a forehead and a face.
-  const hairline = hairlineAt(z)
-  if (y >= hairline || (z <= -2 && y >= 0.5)) {
+  if (y >= hairlineAt(x, z) || (z <= -2 && y >= 0.5)) {
     return z < -3 ? PALETTE.hairDark : PALETTE.hair
   }
 
@@ -162,11 +203,18 @@ function sampleHead(x, y, z) {
 }
 
 function sampleHair(x, y, z) {
-  if (inHead(x, y, z) || !inHairShell(x, y, z)) return null
-  const hairline = hairlineAt(z)
-  if (y >= hairline || (z <= -2 && y >= 0.5)) {
-    return z < -3 ? PALETTE.hairDark : PALETTE.hair
-  }
+  if (inHead(x, y, z)) return null
+
+  const covered = y >= hairlineAt(x, z) || (z <= -2 && y >= 0.5)
+  if (!covered) return null
+
+  if (inHairShell(x, y, z)) return z < -3 ? PALETTE.hairDark : PALETTE.hair
+
+  // Tufts: a few clumps stand one voxel proud of the shell, so the crown has a
+  // broken outline instead of one clean dome. The tuft must rest directly on
+  // hair — tested against the volume at large it spawns detached slivers
+  // floating beside the head.
+  if (isTuft(x, z) && inHairShell(x, y - 1, z)) return PALETTE.hair
   return null
 }
 
@@ -198,9 +246,11 @@ function sampleGlasses(x, y, z) {
       // One short diagonal glint in the upper outer corner of each lens.
       // Measured outward from the eye rather than along +x, so the two lenses
       // mirror each other; a raw dx makes the left glint run the wrong way.
-      const out = side * dx - 1.2
-      const gy = y - EYE.y - 1.1
-      if (r < 2 && Math.abs(out - gy) < 0.55 && out + gy > -0.9) return PALETTE.lens
+      // It has to sit inside the rim's opening — sized for a wider lens it
+      // lands under the frame and disappears entirely.
+      const out = side * dx - 0.7
+      const gy = y - EYE.y - 0.7
+      if (r < 1.5 && Math.abs(out - gy) < 0.5 && out + gy > -0.6) return PALETTE.lens
     }
     // Bridge across the nose.
     if (Math.abs(x) <= EYE.x - 2.3 && Math.abs(y - EYE.y - 0.4) <= 0.45) return PALETTE.frame
@@ -263,24 +313,86 @@ export function sample(x, y, z) {
 }
 
 /**
+ * Face and edge adjacency (18-connectivity), used to decide what counts as
+ * attached.
+ *
+ * Face-only is too strict for this model: a thin ring like a lens rim steps
+ * diagonally across the lattice, so it breaks into arcs that each look like
+ * litter and get culled. Two cubes sharing an edge plainly read as joined.
+ * Corner-only touching is still excluded — that looks like a floating speck.
+ */
+const NEIGHBOURS = []
+for (let dx = -1; dx <= 1; dx++) {
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dz = -1; dz <= 1; dz++) {
+      const steps = Math.abs(dx) + Math.abs(dy) + Math.abs(dz)
+      if (steps === 1 || steps === 2) NEIGHBOURS.push([dx, dy, dz])
+    }
+  }
+}
+
+/**
+ * Drop everything not attached to the main mass.
+ *
+ * The hair noise can strand a clump of a few cells beside the head, which
+ * renders as a sliver floating in mid-air. Rather than tuning the noise until
+ * that stops happening by luck, the builder guarantees one connected piece.
+ */
+function largestComponent(solid, key) {
+  const seen = new Set()
+  let best = null
+
+  for (const start of solid.keys()) {
+    if (seen.has(start)) continue
+    const component = []
+    const queue = [start]
+    seen.add(start)
+    while (queue.length) {
+      const at = queue.pop()
+      component.push(at)
+      const [x, y, z] = at.split(',').map(Number)
+      for (const [dx, dy, dz] of NEIGHBOURS) {
+        const next = key(x + dx, y + dy, z + dz)
+        if (solid.has(next) && !seen.has(next)) {
+          seen.add(next)
+          queue.push(next)
+        }
+      }
+    }
+    if (!best || component.length > best.length) best = component
+  }
+
+  if (!best) return solid
+  const kept = new Map()
+  for (const at of best) kept.set(at, solid.get(at))
+  return kept
+}
+
+/**
  * Build the figure, keeping only voxels with at least one exposed face.
  *
  * Interior voxels can never be seen, and dropping them cuts the instance count
- * by roughly three quarters without changing a single pixel.
+ * by roughly two thirds without changing a single pixel.
  */
-export function buildFigure() {
-  const solid = new Map()
-  const key = (x, y, z) => `${x},${y},${z}`
+const cellKey = (x, y, z) => `${x},${y},${z}`
 
+/** The filled volume, as one connected mass. */
+export function buildSolid() {
+  const raw = new Map()
   for (let x = -BOUNDS.x; x <= BOUNDS.x; x++) {
     for (let y = -BOUNDS.y; y <= BOUNDS.y; y++) {
       for (let z = -BOUNDS.z; z <= BOUNDS.z; z++) {
         const colour = sample(x, y, z)
-        if (colour) solid.set(key(x, y, z), colour)
+        if (colour) raw.set(cellKey(x, y, z), colour)
       }
     }
   }
+  return largestComponent(raw, cellKey)
+}
 
+export function buildFigure() {
+  const key = cellKey
+  const solid = buildSolid()
   const voxels = []
   for (const [at, colour] of solid) {
     const [x, y, z] = at.split(',').map(Number)

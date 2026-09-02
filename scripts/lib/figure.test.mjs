@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildFigure, sample, PALETTE, BOUNDS } from './figure.mjs'
+import { buildFigure, buildSolid, sample, PALETTE, BOUNDS } from './figure.mjs'
 
 const figure = buildFigure()
 const at = new Map(figure.voxels.map((v) => [`${v[0]},${v[1]},${v[2]}`, v.slice(3)]))
@@ -37,18 +37,26 @@ describe('buildFigure', () => {
     expect(at.has('0,6,0')).toBe(false)
   })
 
-  it('is symmetric about the vertical axis apart from the mouth', () => {
-    // The smirk is the only intended asymmetry, so everything else mirroring is
-    // a real invariant: it catches a feature that has drifted off-centre, which
-    // is very hard to see by eye at this scale. The brows are level, and this
-    // is what keeps them that way.
-    const expression = new Set([colourKey(PALETTE.mouth)])
-    for (const [x, y, z, ...colour] of figure.voxels) {
-      if (expression.has(colourKey(colour))) continue
-      const mirrored = at.get(`${-x},${y},${z}`)
-      if (mirrored && expression.has(colourKey(mirrored))) continue
-      expect(mirrored, `no mirror for ${x},${y},${z}`).toBeDefined()
-      expect(colourKey(mirrored)).toBe(colourKey(colour))
+  it('mirrors every face feature exactly', () => {
+    // Checked against the solid volume, not the emitted surface. The hair is
+    // scruffed with noise, so which feature voxels end up *exposed* differs
+    // between the two sides even though they are placed identically; it is the
+    // placement that has to mirror. Skin is left out for the same reason: its
+    // boundary with the hair is asymmetric by design.
+    const placedBy = new Map()
+    for (const [at, colour] of buildSolid()) {
+      const key = colourKey(colour)
+      if (!placedBy.has(key)) placedBy.set(key, new Set())
+      placedBy.get(key).add(at)
+    }
+
+    for (const part of ['frame', 'lens', 'eye', 'sclera', 'brow', 'ear']) {
+      const placed = placedBy.get(colourKey(PALETTE[part]))
+      expect(placed, `${part} missing`).toBeDefined()
+      for (const at of placed) {
+        const [x, y, z] = at.split(',').map(Number)
+        expect(placed.has(`${-x},${y},${z}`), `${part} has no mirror at ${at}`).toBe(true)
+      }
     }
   })
 
@@ -117,6 +125,58 @@ describe('buildFigure', () => {
     for (const [x, y, z] of hair) {
       if (y <= eyeY && z > 4) expect(Math.abs(x)).toBeGreaterThan(5)
     }
+  })
+
+  it('is one connected piece', () => {
+    // Tested on the solid volume, not the emitted surface: two surface voxels
+    // can be joined only through interior cells that were culled, so adjacency
+    // among emitted voxels is not the right question.
+    // Face and edge adjacency, matching the builder: cubes sharing an edge
+    // read as joined, cubes sharing only a corner do not.
+    const adjacency = []
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dz = -1; dz <= 1; dz++) {
+          const steps = Math.abs(dx) + Math.abs(dy) + Math.abs(dz)
+          if (steps === 1 || steps === 2) adjacency.push([dx, dy, dz])
+        }
+      }
+    }
+    const solid = buildSolid()
+    const seen = new Set()
+    const queue = [solid.keys().next().value]
+    seen.add(queue[0])
+    while (queue.length) {
+      const [x, y, z] = queue.pop().split(',').map(Number)
+      for (const [dx, dy, dz] of adjacency) {
+        const next = `${x + dx},${y + dy},${z + dz}`
+        if (solid.has(next) && !seen.has(next)) {
+          seen.add(next)
+          queue.push(next)
+        }
+      }
+    }
+    expect(seen.size).toBe(solid.size)
+  })
+
+  it('has untidy hair rather than a smooth helmet', () => {
+    const hair = new Set([colourKey(PALETTE.hair), colourKey(PALETTE.hairDark)])
+    const strands = figure.voxels.filter((v) => hair.has(colourKey(v.slice(3))))
+
+    // The front hairline should sit at a range of heights across the head, not
+    // trace one clean curve.
+    const front = strands.filter((v) => v[2] > 3)
+    const lowestBy = new Map()
+    for (const [x, y] of front) {
+      lowestBy.set(x, Math.min(lowestBy.get(x) ?? Infinity, y))
+    }
+    expect(new Set(lowestBy.values()).size).toBeGreaterThan(2)
+
+    // And the crown should have a broken outline, not a single top row.
+    const crown = strands.filter((v) => Math.abs(v[2]) < 4)
+    const tops = new Map()
+    for (const [x, y] of crown) tops.set(x, Math.max(tops.get(x) ?? -Infinity, y))
+    expect(new Set(tops.values()).size).toBeGreaterThan(2)
   })
 
   it('is deterministic', () => {
