@@ -15,15 +15,14 @@ import { buildFigure } from './lib/figure.mjs'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const out = resolve(root, process.argv[2] ?? 'figure-preview.png')
 
-const TILE = 300
-const SCALE = 6.2
-const ANGLES = [-0.5, -0.18, 0, 0.5, 1.2, Math.PI]
+const TILE = 420
+const ANGLES = [-0.5, -0.18, 0, 0.5, Math.PI / 2, Math.PI]
 const BG = [11, 14, 19]
 
 // Brightness per cube face, so the blocks read as blocks.
 const FACE_LIGHT = { front: 1, top: 1.18, side: 0.72, bottom: 0.5 }
 
-function renderAngle(voxels, yaw) {
+function renderAngle(voxels, yaw, scale) {
   const buf = Buffer.alloc(TILE * TILE * 3)
   for (let i = 0; i < TILE * TILE; i++) {
     buf[i * 3] = BG[0]
@@ -49,10 +48,14 @@ function renderAngle(voxels, yaw) {
 
   const half = TILE / 2
   for (const v of projected) {
-    const px = Math.round(half + v.rx * SCALE)
-    const py = Math.round(half - (v.ry - 1) * SCALE)
-    const size = Math.ceil(SCALE)
-    for (let dy = 0; dy < size; dy++) {
+    const px = Math.round(half + v.rx * scale)
+    const py = Math.round(half - (v.ry - centreY) * scale)
+    const size = Math.ceil(scale)
+    // The camera pitches down slightly, so each cube also shows a sliver of
+    // its top face. Without it, cubes at different depths leave one-pixel
+    // seams that the far side of the figure shows through.
+    const lid = Math.ceil(scale * sinP)
+    for (let dy = -lid; dy < size; dy++) {
       for (let dx = 0; dx < size; dx++) {
         const x = px + dx
         const y = py + dy
@@ -62,7 +65,7 @@ function renderAngle(voxels, yaw) {
         depth[i] = v.rz
         // Fake a lit top edge and a shaded left edge on each cube.
         const shade =
-          dy === 0 ? FACE_LIGHT.top : dx === 0 ? FACE_LIGHT.side : FACE_LIGHT.front
+          dy <= 0 ? FACE_LIGHT.top : dx === 0 ? FACE_LIGHT.side : FACE_LIGHT.front
         buf[i * 3] = Math.min(255, v.r * shade)
         buf[i * 3 + 1] = Math.min(255, v.g * shade)
         buf[i * 3 + 2] = Math.min(255, v.b * shade)
@@ -75,9 +78,20 @@ function renderAngle(voxels, yaw) {
 const figure = buildFigure()
 console.log(`${figure.count} surface voxels`)
 
+// Fit the figure to the tile from its own extents, so re-sculpting the model
+// at a different scale never crops the preview.
+const ys = figure.voxels.map((v) => v[1])
+const xs = figure.voxels.map((v) => v[0])
+const extent = Math.max(
+  Math.max(...ys) - Math.min(...ys),
+  Math.max(...xs) - Math.min(...xs),
+)
+const centreY = (Math.max(...ys) + Math.min(...ys)) / 2
+const scale = (TILE * 0.92) / (extent + 1)
+
 const tiles = await Promise.all(
   ANGLES.map(async (yaw) =>
-    sharp(renderAngle(figure.voxels, yaw), { raw: { width: TILE, height: TILE, channels: 3 } })
+    sharp(renderAngle(figure.voxels, yaw, scale), { raw: { width: TILE, height: TILE, channels: 3 } })
       .png()
       .toBuffer(),
   ),

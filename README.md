@@ -53,9 +53,11 @@ since a cube buried inside the volume can never be seen.
 Because it is a real 3D model rather than a photo pushed into relief, it holds
 up when you drag it all the way round instead of collapsing into a slab.
 
-To change how the figure looks, edit `PALETTE` for colour and the part
-functions (`sampleHead`, `sampleHair`, `sampleGlasses`, `sampleBody`, …) for
-shape, then run `npm run data:figure`. To see the result without a full build:
+The skull is 40 voxels tall — enough for a three-voxel iris with a highlight,
+a one-voxel rim on the glasses and a row of teeth. To change how the figure
+looks, edit `PALETTE` for colour and the part functions (`sampleFace`,
+`sampleHair`, `sampleGlasses`, `sampleBody`, …) for shape, then run
+`npm run data:figure`. To see the result without a full build:
 
 ```bash
 node scripts/preview-figure.mjs        # contact sheet at six angles
