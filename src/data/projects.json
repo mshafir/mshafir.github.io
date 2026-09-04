@@ -54,21 +54,21 @@
     "featured": true
   },
   {
+    "name": "investbot",
+    "url": "https://github.com/mshafir/investbot",
+    "blurb": "Financial planner agent scripts and knowledge",
+    "language": "Python",
+    "stars": 1,
+    "pushedAt": "2026-09-03T18:28:28Z",
+    "featured": false
+  },
+  {
     "name": "mshafir.github.io",
     "url": "https://github.com/mshafir/mshafir.github.io",
     "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
     "language": "TypeScript",
     "stars": 0,
-    "pushedAt": "2026-09-03T01:50:46Z",
-    "featured": false
-  },
-  {
-    "name": "investbot",
-    "url": "https://github.com/mshafir/investbot",
-    "blurb": "Financial planner agent scripts and knowledge",
-    "language": "Python",
-    "stars": 0,
-    "pushedAt": "2026-09-02T22:18:30Z",
+    "pushedAt": "2026-09-03T11:21:42Z",
     "featured": false
   },
   {
