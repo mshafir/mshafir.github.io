@@ -1,8 +1,17 @@
 [
   {
+    "name": "investbot",
+    "url": "https://github.com/mshafir/investbot",
+    "blurb": "I gave claude access to my Schwab account (via the Developer API) and we set up this personal financial advisor. I encoded my investment preferences and rules and gave claude some code and skills to be able to deploy new cash, rebalance my portfolio, perform tax harvesting and more. It makes a great advisor for finding alternate investment options and reasoning through my choices. I tried to make the config and broker apis configurable so others can reuse it for their own investment advice.",
+    "language": "Python",
+    "stars": 3,
+    "pushedAt": "2026-09-03T18:28:28Z",
+    "featured": true
+  },
+  {
     "name": "auto-adventure",
     "url": "https://github.com/mshafir/auto-adventure",
-    "blurb": "A terminal adventure game whose maps, rooms and encounters are generated on the fly by an LLM.",
+    "blurb": "A terminal-based graphical adventure game with tile based rendering and a declarative game structure that LLMs can understand. This started with LLM generating text and missing in-game, but that wasn't very fun so I just pivoted to being able to prompt the LLM to generate a full game for you. Still needs a lot of work, thinking of maybe restarting the goal from scratch.",
     "language": "TypeScript",
     "stars": 1,
     "pushedAt": "2026-08-17T12:56:53Z",
@@ -11,46 +20,10 @@
   {
     "name": "reactlit",
     "url": "https://github.com/mshafir/reactlit",
-    "blurb": "A faster way to build React apps — Streamlit's ergonomics without leaving the React ecosystem.",
+    "blurb": "My last artisanally coded project. A faster way to build React apps — Streamlit's ergonomics without leaving the React ecosystem. Probably not relevant anymore to anybody, but was a fun experiment and still think it has some value for lightweight internal tooling that reuses react components.",
     "language": "TypeScript",
     "stars": 12,
     "pushedAt": "2025-04-25T15:04:25Z",
-    "featured": true
-  },
-  {
-    "name": "react-element-replace",
-    "url": "https://github.com/mshafir/react-element-replace",
-    "blurb": "A component that rewrites its own subtree, replacing matching elements as they render.",
-    "language": "TypeScript",
-    "stars": 7,
-    "pushedAt": "2023-01-04T23:39:24Z",
-    "featured": true
-  },
-  {
-    "name": "vislib",
-    "url": "https://github.com/mshafir/vislib",
-    "blurb": "Web-based visualizations for Python and IPython notebooks.",
-    "language": "Python",
-    "stars": 3,
-    "pushedAt": "2018-06-07T20:01:29Z",
-    "featured": true
-  },
-  {
-    "name": "codenames-ai",
-    "url": "https://github.com/mshafir/codenames-ai",
-    "blurb": "An agent that plays Codenames, reasoning over word embeddings to find the clue linking the most cards.",
-    "language": "CSS",
-    "stars": 3,
-    "pushedAt": "2017-12-19T00:06:39Z",
-    "featured": true
-  },
-  {
-    "name": "multilaunch",
-    "url": "https://github.com/mshafir/multilaunch",
-    "blurb": "A small CLI for running and supervising several processes at once.",
-    "language": "TypeScript",
-    "stars": 1,
-    "pushedAt": "2021-11-11T16:07:01Z",
     "featured": true
   },
   {
@@ -59,16 +32,7 @@
     "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
     "language": "TypeScript",
     "stars": 0,
-    "pushedAt": "2026-09-07T12:42:07Z",
-    "featured": false
-  },
-  {
-    "name": "investbot",
-    "url": "https://github.com/mshafir/investbot",
-    "blurb": "Financial planner agent scripts and knowledge",
-    "language": "Python",
-    "stars": 1,
-    "pushedAt": "2026-09-03T18:28:28Z",
+    "pushedAt": "2026-09-08T11:25:21Z",
     "featured": false
   },
   {
@@ -78,6 +42,24 @@
     "language": "TypeScript",
     "stars": 1,
     "pushedAt": "2024-12-16T14:03:49Z",
+    "featured": false
+  },
+  {
+    "name": "react-element-replace",
+    "url": "https://github.com/mshafir/react-element-replace",
+    "blurb": "A React Component that transforms its subtree, replacing elements following the provided rules.",
+    "language": "TypeScript",
+    "stars": 7,
+    "pushedAt": "2023-01-04T23:39:24Z",
+    "featured": false
+  },
+  {
+    "name": "multilaunch",
+    "url": "https://github.com/mshafir/multilaunch",
+    "blurb": "Command line utility for launching multiple processes",
+    "language": "TypeScript",
+    "stars": 1,
+    "pushedAt": "2021-11-11T16:07:01Z",
     "featured": false
   },
   {
@@ -96,6 +78,24 @@
     "language": "JavaScript",
     "stars": 3,
     "pushedAt": "2018-06-12T19:14:07Z",
+    "featured": false
+  },
+  {
+    "name": "vislib",
+    "url": "https://github.com/mshafir/vislib",
+    "blurb": "A library of web-based visualizations for python and ipython",
+    "language": "Python",
+    "stars": 3,
+    "pushedAt": "2018-06-07T20:01:29Z",
+    "featured": false
+  },
+  {
+    "name": "codenames-ai",
+    "url": "https://github.com/mshafir/codenames-ai",
+    "blurb": "An AI for playing codenames",
+    "language": "CSS",
+    "stars": 3,
+    "pushedAt": "2017-12-19T00:06:39Z",
     "featured": false
   },
   {

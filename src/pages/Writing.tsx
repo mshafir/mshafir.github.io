@@ -1,4 +1,5 @@
 import { Seo } from '../components/Seo'
+import { AuthorshipNote } from '../components/AuthorshipNote/AuthorshipNote'
 import { PostList } from '../components/PostList/PostList'
 import { allPosts } from '../content/posts'
 import './pages.css'
@@ -13,6 +14,7 @@ export default function Writing() {
       />
       <h1 className="page__title">Writing</h1>
       <p className="page__lede">Notes on AI, architecture, and the systems underneath.</p>
+      <AuthorshipNote />
       <PostList id="all-posts" posts={allPosts} />
     </div>
   )

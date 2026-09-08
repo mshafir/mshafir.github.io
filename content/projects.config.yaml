@@ -1,0 +1,29 @@
+# Curates the GitHub repo list fetched by `npm run data:github`.
+# Output lands in src/data/projects.json (committed; refreshed nightly).
+
+# Pinned to the top of the list, in this order.
+featured:
+  - investbot
+  - auto-adventure
+  - reactlit
+
+# Never shown, even if GitHub returns them.
+hidden:
+  - weddingsite
+  - kavod-crm
+  - ember-java-starter-kit
+
+# Per-repo fields that replace what GitHub reports.
+overrides:
+  investbot:
+    blurb: I gave claude access to my Schwab account (via the Developer API) and we set up this personal financial advisor.
+           I encoded my investment preferences and rules and gave claude some code and skills to be able to deploy new cash, rebalance my portfolio,
+           perform tax harvesting and more. It makes a great advisor for finding alternate investment options and reasoning through my choices. I tried
+           to make the config and broker apis configurable so others can reuse it for their own investment advice.
+  auto-adventure:
+    blurb: A terminal-based graphical adventure game with tile based rendering and a declarative game structure that LLMs can understand. This started with LLM
+           generating text and missing in-game, but that wasn't very fun so I just pivoted to being able to prompt the LLM to generate a full game for you.
+           Still needs a lot of work, thinking of maybe restarting the goal from scratch.
+  reactlit:
+    blurb: My last artisanally coded project. A faster way to build React apps — Streamlit's ergonomics without leaving the React ecosystem. Probably not relevant
+           anymore to anybody, but was a fun experiment and still think it has some value for lightweight internal tooling that reuses react components.

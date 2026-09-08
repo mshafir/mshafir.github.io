@@ -2,10 +2,11 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import yaml from 'js-yaml'
 import { curate } from './lib/curate.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const CONFIG = resolve(root, 'content/projects.config.json')
+const CONFIG = resolve(root, 'content/projects.config.yaml')
 const OUTPUT = resolve(root, 'src/data/projects.json')
 const USER = 'mshafir'
 
@@ -25,7 +26,7 @@ if (!response.ok) {
   process.exit(1)
 }
 
-const config = JSON.parse(await readFile(CONFIG, 'utf8'))
+const config = yaml.load(await readFile(CONFIG, 'utf8'))
 const projects = curate(await response.json(), config)
 
 await mkdir(dirname(OUTPUT), { recursive: true })

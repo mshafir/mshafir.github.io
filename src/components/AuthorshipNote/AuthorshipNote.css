@@ -1,0 +1,10 @@
+.authorship-note {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--dim);
+  max-width: var(--measure);
+  margin: 0 0 var(--space-8);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--border);
+}

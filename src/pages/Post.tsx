@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { AuthorshipNote } from '../components/AuthorshipNote/AuthorshipNote'
 import { Seo } from '../components/Seo'
 import { getAdjacentPosts, getPost } from '../content/posts'
 import NotFound from './NotFound'
@@ -50,6 +51,8 @@ export default function Post() {
 
       {/* Markdown was compiled to HTML at build time by our own Vite plugin. */}
       <div className="prose" dangerouslySetInnerHTML={{ __html: post.html }} />
+
+      <AuthorshipNote />
 
       <nav className="article__nav" aria-label="Post navigation">
         {previous ? (
