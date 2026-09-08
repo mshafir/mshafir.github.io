@@ -12,7 +12,9 @@
     "preview": "node scripts/preview.mjs",
     "typecheck": "tsc --noEmit",
     "data:github": "node scripts/fetch-github.mjs",
-    "data:figure": "node scripts/build-figure.mjs"
+    "data:figure": "node scripts/build-figure.mjs",
+    "data:figure:extract": "node scripts/extract-head.mjs",
+    "data:figure:authored": "node scripts/build-authored.mjs"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +39,7 @@
     "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "^6.1.1",
     "gray-matter": "^4.0.3",
+    "js-yaml": "^4.3.2",
     "jsdom": "^30.0.1",
     "marked": "^18.0.11",
     "sharp": "^0.35.4",

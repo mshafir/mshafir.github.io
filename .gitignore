@@ -4,3 +4,5 @@ dist
 .DS_Store
 *.local
 figure-preview.png
+# The head scan stays local; content/figure/head.json is what is committed.
+content/figure/scan.*

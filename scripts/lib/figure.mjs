@@ -75,7 +75,7 @@ const smoothstep = (t) => {
  * reproducible, so this stands in for a random number generator: same input,
  * same mess, every build.
  */
-function hash3(a, b, c) {
+export function hash3(a, b, c) {
   let h = Math.imul(a | 0, 374761393) ^ Math.imul(b | 0, 668265263) ^ Math.imul(c | 0, 2246822519)
   h = Math.imul(h ^ (h >>> 13), 1274126177)
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296
@@ -88,7 +88,7 @@ function hash3(a, b, c) {
  * the variation clump into curls a few voxels across, which is what reads as
  * untidy hair rather than noise.
  */
-function clump(x, y, z, scale, seed) {
+export function clump(x, y, z, scale, seed) {
   return hash3(
     Math.floor(x / scale) + seed * 131,
     Math.floor(y / scale) - seed * 57,

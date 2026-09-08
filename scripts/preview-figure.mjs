@@ -5,15 +5,29 @@
  * A dev aid for sculpting: a painter's-algorithm voxel render is far quicker to
  * iterate against than a full build plus a headless browser.
  *
- * Usage: node scripts/preview-figure.mjs [out.png]
+ * Usage: node scripts/preview-figure.mjs [out.png] [--json file | --authored]
+ *
+ * Renders src/data/voxels.json by default. --json renders another voxel file,
+ * which is how a scan voxelizer run is checked before it is written there;
+ * --authored builds and renders the hand-authored figure instead.
  */
+import { readFile } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { buildFigure } from './lib/figure.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const out = resolve(root, process.argv[2] ?? 'figure-preview.png')
+const args = process.argv.slice(2)
+const jsonFlag = args.indexOf('--json')
+const authored = args.includes('--authored')
+const jsonPath = authored
+  ? null
+  : resolve(root, jsonFlag === -1 ? 'src/data/voxels.json' : args[jsonFlag + 1])
+const positional = args.filter(
+  (a, i) => a !== '--json' && a !== '--authored' && (jsonFlag === -1 || i !== jsonFlag + 1),
+)
+const out = resolve(root, positional[0] ?? 'figure-preview.png')
 
 const TILE = 420
 const ANGLES = [-0.5, -0.18, 0, 0.5, Math.PI / 2, Math.PI]
@@ -75,7 +89,9 @@ function renderAngle(voxels, yaw, scale) {
   return buf
 }
 
-const figure = buildFigure()
+const figure = jsonPath
+  ? JSON.parse(await readFile(jsonPath, 'utf8'))
+  : buildFigure()
 console.log(`${figure.count} surface voxels`)
 
 // Fit the figure to the tile from its own extents, so re-sculpting the model
