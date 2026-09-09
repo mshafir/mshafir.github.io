@@ -11,12 +11,12 @@ const formatDate = (iso: string) =>
   })
 
 export function PostList({ id, posts }: { id: string; posts: Post[] }) {
-  const { itemRef } = useRovingFocus({ id, count: posts.length, label: 'post' })
+  const { itemRef, listProps } = useRovingFocus({ id, count: posts.length, label: 'post' })
 
   if (posts.length === 0) return <p className="page__lede">No posts yet.</p>
 
   return (
-    <ul className="post-list">
+    <ul className="post-list" {...listProps}>
       {posts.map((post, index) => (
         <li key={post.slug}>
           <Link className="post-list__link" to={`/writing/${post.slug}`} ref={itemRef(index)}>

@@ -1,9 +1,19 @@
 export interface Binding {
   keys: string
   label: string
-  action: () => void
+  /**
+   * Return `false` to decline the key: the provider then offers it to the
+   * next matching binding, and to the browser if nobody takes it.
+   */
+  action: () => void | false
   hidden?: boolean
   allowInInput?: boolean
+  /**
+   * Keys to display instead of `keys`, for a binding that stands in for a
+   * family ("ArrowUp ArrowDown" shown on the ArrowDown binding while ArrowUp
+   * stays hidden).
+   */
+  hint?: string
 }
 
 export interface ScopeDefinition {

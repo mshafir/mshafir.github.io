@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { eventToToken, parseChord } from './matchKeys'
+import { displayToken, eventToToken, parseChord } from './matchKeys'
 
 const event = (init: Partial<KeyboardEvent>) => init as KeyboardEvent
 
@@ -40,5 +40,18 @@ describe('parseChord', () => {
 
   it('collapses repeated whitespace', () => {
     expect(parseChord('g   p')).toEqual(['g', 'p'])
+  })
+})
+
+describe('displayToken', () => {
+  it('turns named keys into glyphs', () => {
+    expect(displayToken('ArrowUp')).toBe('↑')
+    expect(displayToken('Enter')).toBe('↵')
+    expect(displayToken('Escape')).toBe('esc')
+  })
+
+  it('prefixes the modifier and leaves plain keys alone', () => {
+    expect(displayToken('mod+k')).toBe('⌘k')
+    expect(displayToken('g')).toBe('g')
   })
 })

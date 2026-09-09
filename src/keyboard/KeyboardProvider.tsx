@@ -113,13 +113,18 @@ export function KeyboardProvider({
         return
       }
 
-      const exact = candidates.find(
+      const exact = candidates.filter(
         (binding) => parseChord(binding.keys).length === sequence.length,
       )
-      if (exact) {
-        event.preventDefault()
+      if (exact.length > 0) {
         clearPending()
-        exact.action()
+        // Bindings may decline; the first one that does not gets the key.
+        for (const binding of exact) {
+          if (binding.action() !== false) {
+            event.preventDefault()
+            return
+          }
+        }
         return
       }
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useActiveBindings } from '../../keyboard/KeyboardProvider'
+import { displayToken } from '../../keyboard/matchKeys'
 import './HelpOverlay.css'
 
 export function HelpOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -35,9 +36,9 @@ export function HelpOverlay({ open, onClose }: { open: boolean; onClose: () => v
           {bindings.map((binding) => (
             <div className="overlay__row" key={binding.keys}>
               <dt>
-                {binding.keys.split(' ').map((token, i) => (
+                {(binding.hint ?? binding.keys).split(' ').map((token, i) => (
                   <kbd className="overlay__key" key={i}>
-                    {token.replace('mod+', '⌘').replace('Enter', '↵')}
+                    {displayToken(token)}
                   </kbd>
                 ))}
               </dt>

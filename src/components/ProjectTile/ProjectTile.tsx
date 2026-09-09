@@ -17,14 +17,36 @@ const LANGUAGE_COLORS: Record<string, string> = {
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
 
-export const ProjectTile = forwardRef<HTMLAnchorElement, { project: Project }>(
-  function ProjectTile({ project }, ref) {
+type Variant = 'tile' | 'feature'
+
+export const ProjectTile = forwardRef<HTMLAnchorElement, { project: Project; variant?: Variant }>(
+  function ProjectTile({ project, variant = 'tile' }, ref) {
     const [active, setActive] = useState(false)
+    const feature = variant === 'feature'
+
+    const meta = (
+      <div className="tile__meta">
+        {project.language && (
+          <span className="tile__chip">
+            <span
+              className="tile__dot"
+              style={{ background: LANGUAGE_COLORS[project.language] ?? 'var(--dim)' }}
+            />
+            {project.language}
+          </span>
+        )}
+        <span className="tile__chip" title={`${project.stars} stars`}>
+          <span aria-hidden="true">★</span>
+          {project.stars}
+        </span>
+        <span className="tile__chip tile__chip--date">{formatDate(project.pushedAt)}</span>
+      </div>
+    )
 
     return (
       <a
         ref={ref}
-        className="tile"
+        className={feature ? 'tile tile--feature' : 'tile'}
         href={project.url}
         target="_blank"
         rel="noopener noreferrer"
@@ -36,26 +58,23 @@ export const ProjectTile = forwardRef<HTMLAnchorElement, { project: Project }>(
         onBlur={() => setActive(false)}
       >
         <MatrixRain active={active} />
-        <div className="tile__body">
-          <h3 className="tile__name">{project.name}</h3>
-          {project.blurb && <p className="tile__blurb">{project.blurb}</p>}
-          <div className="tile__meta">
-            {project.language && (
-              <span className="tile__chip">
-                <span
-                  className="tile__dot"
-                  style={{ background: LANGUAGE_COLORS[project.language] ?? 'var(--dim)' }}
-                />
-                {project.language}
-              </span>
-            )}
-            <span className="tile__chip" title={`${project.stars} stars`}>
-              <span aria-hidden="true">★</span>
-              {project.stars}
-            </span>
-            <span className="tile__chip tile__chip--date">{formatDate(project.pushedAt)}</span>
+        {feature ? (
+          // Name and meta form a narrow left column; the blurb gets the rest
+          // of the width so long prose reads at a comfortable measure.
+          <div className="tile__body tile__body--feature">
+            <div className="tile__head">
+              <h3 className="tile__name">{project.name}</h3>
+              {meta}
+            </div>
+            {project.blurb && <p className="tile__blurb">{project.blurb}</p>}
           </div>
-        </div>
+        ) : (
+          <div className="tile__body">
+            <h3 className="tile__name">{project.name}</h3>
+            {project.blurb && <p className="tile__blurb">{project.blurb}</p>}
+            {meta}
+          </div>
+        )}
       </a>
     )
   },

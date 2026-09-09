@@ -198,3 +198,33 @@ describe('KeyboardProvider', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(1)
   })
 })
+
+describe('declining a key', () => {
+  it('passes the key to the next scope when an action returns false', async () => {
+    const declined = vi.fn(() => false as const)
+    const accepted = vi.fn()
+    render(
+      <KeyboardProvider>
+        <Scope id="outer" bindings={[{ keys: 'x', label: 'outer', action: accepted }]}>
+          <Scope id="inner" bindings={[{ keys: 'x', label: 'inner', action: declined }]} />
+        </Scope>
+      </KeyboardProvider>,
+    )
+    await userEvent.setup().keyboard('x')
+    expect(declined).toHaveBeenCalledOnce()
+    expect(accepted).toHaveBeenCalledOnce()
+  })
+
+  it('leaves the browser default in place when every scope declines', async () => {
+    const declined = vi.fn(() => false as const)
+    render(
+      <KeyboardProvider>
+        <Scope id="s" bindings={[{ keys: 'x', label: 'inner', action: declined }]} />
+      </KeyboardProvider>,
+    )
+    const event = new KeyboardEvent('keydown', { key: 'x', bubbles: true, cancelable: true })
+    window.dispatchEvent(event)
+    expect(declined).toHaveBeenCalledOnce()
+    expect(event.defaultPrevented).toBe(false)
+  })
+})

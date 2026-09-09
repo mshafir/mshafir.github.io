@@ -1,3 +1,15 @@
+.tile-sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.tile-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
 .tile-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
@@ -99,8 +111,63 @@
   margin-left: auto;
 }
 
+/* Feature rows: a narrow identity column beside a prose-width blurb. */
+
+.tile--feature {
+  min-height: 0;
+}
+
+.tile__body--feature {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+  padding: 1.25rem var(--space-6);
+}
+
+.tile__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tile__body--feature .tile__meta {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-top: 0;
+}
+
+.tile__body--feature .tile__chip--date {
+  margin-left: 0;
+}
+
+.tile__body--feature .tile__blurb {
+  flex: initial;
+  max-width: 65ch;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--text) 78%, var(--dim));
+}
+
 @media (max-width: 767px) {
   .tile-grid {
     grid-template-columns: 1fr;
+  }
+
+  .tile__body--feature {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .tile__body--feature .tile__meta {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .tile__body--feature .tile__blurb {
+    font-size: 0.875rem;
   }
 }
