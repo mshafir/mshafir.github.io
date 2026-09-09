@@ -27,8 +27,7 @@ export default function Home() {
           <p className="hero__role">Software Architect</p>
           <h1 className="hero__name">Michael Shafir</h1>
           <p className="hero__blurb">
-            I design and build software systems, and I write about what happens when you put
-            language models inside them.
+            I like designing and building things and solving problems.
           </p>
           <div className="hero__links">
             <a className="hero__link" href="https://github.com/mshafir">
