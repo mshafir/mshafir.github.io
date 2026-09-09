@@ -4,7 +4,7 @@
     "url": "https://github.com/mshafir/investbot",
     "blurb": "I gave claude access to my Schwab account (via the Developer API) and we set up this personal financial advisor. I encoded my investment preferences and rules and gave claude some code and skills to be able to deploy new cash, rebalance my portfolio, perform tax harvesting and more. It makes a great advisor for finding alternate investment options and reasoning through my choices. I tried to make the config and broker apis configurable so others can reuse it for their own investment advice.",
     "language": "Python",
-    "stars": 3,
+    "stars": 5,
     "pushedAt": "2026-09-03T18:28:28Z",
     "featured": true
   },
@@ -30,9 +30,9 @@
     "name": "mshafir.github.io",
     "url": "https://github.com/mshafir/mshafir.github.io",
     "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
-    "language": "TypeScript",
+    "language": "JavaScript",
     "stars": 0,
-    "pushedAt": "2026-09-08T11:25:21Z",
+    "pushedAt": "2026-09-09T13:23:41Z",
     "featured": false
   },
   {
