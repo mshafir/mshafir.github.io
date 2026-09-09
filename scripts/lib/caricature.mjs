@@ -290,13 +290,35 @@ export function buildCaricature(m, shape, { bounds, slim = 0.93 }) {
 
   // Below the chin the jaw closes quickly onto the neck; the scan's rows there
   // are collar and shoulder, which is not what a head does.
-  // `slim` narrows the head side to side: the carve's furthest-cell-per-bearing
-  // lets the ears smooth into the skull and widen it, and a real head is taller
-  // than it is wide.
+  // The neck, sized from the head, so the jaw can blend into it.
+  const headHalf = shape.radiusAt(Math.round((glasses.top + glasses.bottom) / 2), ax + 20, az)
+  const neckR = Math.max(4, headHalf * 0.36)
+
+  /**
+   * Is a cell inside the head?
+   *
+   * `slim` narrows the head side to side: the carve's furthest-cell-per-bearing
+   * lets the ears smooth into the skull and widen it, and a real head is taller
+   * than it is wide.
+   *
+   * Below the jaw the carved rows are collar and shoulder, so the head is
+   * blended into the neck instead. A jawline runs from the chin up to the ear,
+   * so the blend starts at the chin at the front and well above it round the
+   * back; started at one height all round it left square corners under the
+   * ears.
+   */
   const inHead = (x, y, z) => {
+    if (y > shape.toY) return false
     const sx = (x - ax) / slim
-    const r = y >= chinY ? shape.radiusAt(y, ax + sx, z) : shape.radiusAt(chinY, ax + sx, z) * (1 - (chinY - y) * 0.3)
-    return Math.hypot(sx, z - az) <= r
+    const dz = z - az
+    const backness = (1 - dz / Math.max(1e-6, Math.hypot(sx, dz))) / 2
+    const rise = 1 + 9 * backness
+    const start = chinY + rise
+    const base = shape.radiusAt(Math.max(y, chinY), ax + sx, z)
+    if (y >= start) return Math.hypot(sx, dz) <= base
+    const t = clamp01((start - y) / (rise + 3))
+    const r = neckR + (base - neckR) * Math.sqrt(Math.max(0, 1 - t * t))
+    return Math.hypot(sx, dz) <= r
   }
 
   // Front-most head cell per x/y column, so features can sit on the surface.
@@ -527,7 +549,7 @@ export function buildCaricature(m, shape, { bounds, slim = 0.93 }) {
 
   // Body, hung from the chin and scaled to the head.
   const W = Math.max(12, headHalfWidth(Math.round(bandMid), az))
-  const NECK = { rx: W * 0.34, rz: W * 0.3, z: az - 1 }
+  const NECK = { rx: neckR, rz: neckR * 0.9, z: az - 1 }
   const collarTop = chinY - 3
   const collarBottom = collarTop - 2.5
   const torsoTop = collarBottom
