@@ -16,6 +16,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      # The fetch script reads its YAML config through js-yaml.
+      - run: npm ci
       - run: node scripts/fetch-github.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
