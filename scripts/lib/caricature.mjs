@@ -116,6 +116,8 @@ export function measure(solid, surface, { axis }) {
     chinY,
     noseY,
     noseZ: front(noseY) - axis.z,
+    // Depth of the brow just above the glasses: what the nose is measured against.
+    browZ: front(bandTop + 2) - axis.z,
     mouthY,
     glasses: { bottom: bandBottom, top: bandTop, halfWidth: frameHalfWidth },
   }
@@ -139,7 +141,7 @@ const TAU = Math.PI * 2
  * caricature wants. `exaggerate` then pushes every radius away from the row's
  * mean, so what stands out stands out more.
  */
-export function carve(solid, surface, m, { bins = 72, sigma = 1.4, exaggerate = 1.15, fromY, toY }) {
+export function carve(solid, surface, m, { bins = 96, sigma = 1.1, exaggerate = 1.15, fromY, toY }) {
   const { axis } = m
   const bearing = (x, z) => {
     const t = Math.atan2(x - axis.x, z - axis.z)
@@ -329,17 +331,41 @@ export function buildCaricature(m, shape, { bounds }) {
   const MOUTH = { y: mouthY, half: Math.min(faceHalf * 0.55, lensHalfW * 1.5) }
   const noseBase = noseY - 2
 
+  // The nose. Smoothing over bearings rubs most of it off the carved head, so
+  // it is put back as a bump sized from the measurement: however far the
+  // scan's nose tip stood in front of the brow, so does this one.
+  const browDepth = frontDepth(ax, Math.round(glasses.top + 2))
+  const carvedTip = frontDepth(ax, noseY)
+  const measuredProud = m.noseZ - m.browZ
+  const wanted = Math.max(3, measuredProud * 1.25)
+  const tip = Math.max(carvedTip + 3, browDepth + wanted)
+  // Centred between the carved surface and the tip, so the tip is the tip.
+  const NOSE = { y: noseY, z: (carvedTip + tip) / 2, rx: 2.6, ry: 3.2, rz: (tip - carvedTip) / 2 + 0.6 }
+  const inNose = (x, y, z) => {
+    if (ellipsoid(x, y, z, ax, NOSE.y, NOSE.z, NOSE.rx, NOSE.ry, NOSE.rz)) return true
+    // The bridge, narrower, running up to the glasses.
+    const ridgeY = noseY + 4
+    return ellipsoid(x, y, z, ax, ridgeY, frontDepth(ax, ridgeY) + 0.6, 1.4, 4.5, 1.8)
+  }
+  function sampleNose(x, y, z) {
+    if (!inNose(x, y, z)) return null
+    if (y < NOSE.y - 1.4) return PALETTE.skinShade
+    return Math.abs(x - ax) > 0.8 || z < tip - 1.5 ? PALETTE.skinMid : PALETTE.skin
+  }
+
   function sampleFace(x, y, z) {
     const dx0 = x - ax
 
-    // Mouth: a broad smile, open only a little, one row of teeth.
-    const lower = MOUTH.y - 1 + (0.06 * dx0 * dx0) / (MOUTH.half / 6.5)
-    const upper = MOUTH.y + 0.9 + (0.015 * dx0 * dx0) / (MOUTH.half / 6.5)
+    // Mouth: a broad smile, open only a little, one row of teeth. The lip
+    // lines are snapped to whole rows first; tested as real curves, the teeth
+    // row jumps between rows along the mouth and reads as missing teeth.
+    const lower = Math.round(MOUTH.y - 1 + (0.06 * dx0 * dx0) / (MOUTH.half / 6.5))
+    const upper = Math.round(MOUTH.y + 1.4 + (0.015 * dx0 * dx0) / (MOUTH.half / 6.5))
     if (Math.abs(dx0) <= MOUTH.half) {
       if (y > lower && y < upper) {
-        return y >= lower + 0.9 && Math.abs(dx0) <= MOUTH.half * 0.62 ? PALETTE.teeth : PALETTE.mouth
+        return y === upper - 1 && Math.abs(dx0) <= MOUTH.half * 0.7 ? PALETTE.teeth : PALETTE.mouth
       }
-      if ((y >= lower - 0.9 && y <= lower) || (y >= upper && y <= upper + 0.8)) return PALETTE.lip
+      if (y === lower || y === upper) return PALETTE.lip
     }
 
     // Eyes.
@@ -368,6 +394,9 @@ export function buildCaricature(m, shape, { bounds }) {
       if (Math.abs(dx) <= 2 && y >= EYE.y - 3.2 && y <= EYE.y - 2.4) return PALETTE.skinMid
     }
 
+    // A shadow under the nose.
+    if (Math.abs(dx0) <= 2.4 && y >= NOSE.y - 3.6 && y <= NOSE.y - 2.6) return PALETTE.skinShade
+
     // Smile lines from the nose to past the corners of the mouth.
     for (const side of [-1, 1]) {
       const fold = distanceToSegment(
@@ -390,7 +419,7 @@ export function buildCaricature(m, shape, { bounds }) {
 
   function hairColour(x, y, z) {
     if (z < az - 8) return PALETTE.hairDark
-    if (Math.abs(x - ax) >= 11 && y <= glasses.top + 10 && hash3(x, y, z) > 0.8) return PALETTE.hairGrey
+    if (Math.abs(x - ax) >= 11 && y <= glasses.top + 10 && hash3(x, y, z) > 0.88) return PALETTE.hairGrey
     const n = clump(x, y, z, 3, 5)
     if (n > 0.78 && y > glasses.top + 8 && z > az - 2) return PALETTE.hairLight
     if (n < 0.18) return PALETTE.hairDark
@@ -532,6 +561,7 @@ export function buildCaricature(m, shape, { bounds }) {
 
   const sample = (x, y, z) =>
     sampleGlasses(x, y, z) ??
+    sampleNose(x, y, z) ??
     sampleEars(x, y, z) ??
     sampleHair(x, y, z) ??
     sampleHead(x, y, z) ??
