@@ -327,8 +327,9 @@ export function buildCaricature(m, shape, { bounds }) {
   const lensX = glasses.halfWidth - lensHalfW - 0.5
   const EYE = { x: lensX - 0.6, y: bandMid - 0.2 }
   const BROW = { x: lensX + 0.3, y: glasses.top + 2.6, half: lensHalfW * 0.95 }
-  const faceHalf = Math.max(6, headHalfWidth(mouthY, frontDepth(ax, mouthY) - 4))
-  const MOUTH = { y: mouthY, half: Math.min(faceHalf * 0.55, lensHalfW * 1.5) }
+  const faceHalf = Math.max(8, headHalfWidth(mouthY, az))
+  // A smile runs most of the way across the face at mouth level.
+  const MOUTH = { y: mouthY, half: faceHalf * 0.56 }
   const noseBase = noseY - 2
 
   // The nose. Smoothing over bearings rubs most of it off the carved head, so
@@ -360,7 +361,7 @@ export function buildCaricature(m, shape, { bounds }) {
     // lines are snapped to whole rows first; tested as real curves, the teeth
     // row jumps between rows along the mouth and reads as missing teeth.
     const lower = Math.round(MOUTH.y - 1 + (0.06 * dx0 * dx0) / (MOUTH.half / 6.5))
-    const upper = Math.round(MOUTH.y + 1.4 + (0.015 * dx0 * dx0) / (MOUTH.half / 6.5))
+    const upper = Math.round(MOUTH.y + 1.6 + (0.015 * dx0 * dx0) / (MOUTH.half / 6.5))
     if (Math.abs(dx0) <= MOUTH.half) {
       if (y > lower && y < upper) {
         return y === upper - 1 && Math.abs(dx0) <= MOUTH.half * 0.7 ? PALETTE.teeth : PALETTE.mouth
