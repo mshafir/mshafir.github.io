@@ -309,6 +309,9 @@ export function buildCaricature(m, shape, { bounds, slim = 0.93 }) {
    */
   const inHead = (x, y, z) => {
     if (y > shape.toY) return false
+    // The body's neck takes over below here; without a floor, the blend's
+    // neck-radius cylinder runs down inside the torso and shows underneath.
+    if (y < chinY - 3) return false
     const sx = (x - ax) / slim
     const dz = z - az
     const backness = (1 - dz / Math.max(1e-6, Math.hypot(sx, dz))) / 2
