@@ -15,6 +15,11 @@ import { PALETTE as CARTOON, clump, hash3 } from './figure.mjs'
 
 export const PALETTE = {
   ...CARTOON,
+  // Fair and a little pink, not the cartoon reference's tan.
+  skin: [241, 199, 168],
+  skinMid: [222, 172, 146],
+  skinShade: [200, 148, 124],
+  stubble: [204, 166, 150],
   // Short, dark, going grey. The scan's hair is browner than it looks in life.
   hair: [64, 50, 42],
   hairLight: [96, 80, 68],
@@ -278,16 +283,20 @@ export function shapeFrom(data, axis) {
  * Everything that follows is placed by the measured landmarks, so a new scan
  * moves the features with the face.
  */
-export function buildCaricature(m, shape, { bounds }) {
+export function buildCaricature(m, shape, { bounds, slim = 0.93 }) {
   const { axis, chinY, noseY, mouthY, glasses } = m
   const ax = axis.x
   const az = axis.z
 
   // Below the chin the jaw closes quickly onto the neck; the scan's rows there
   // are collar and shoulder, which is not what a head does.
+  // `slim` narrows the head side to side: the carve's furthest-cell-per-bearing
+  // lets the ears smooth into the skull and widen it, and a real head is taller
+  // than it is wide.
   const inHead = (x, y, z) => {
-    const r = y >= chinY ? shape.radiusAt(y, x, z) : shape.radiusAt(chinY, x, z) * (1 - (chinY - y) * 0.3)
-    return Math.hypot(x - ax, z - az) <= r
+    const sx = (x - ax) / slim
+    const r = y >= chinY ? shape.radiusAt(y, ax + sx, z) : shape.radiusAt(chinY, ax + sx, z) * (1 - (chinY - y) * 0.3)
+    return Math.hypot(sx, z - az) <= r
   }
 
   // Front-most head cell per x/y column, so features can sit on the surface.
@@ -322,9 +331,11 @@ export function buildCaricature(m, shape, { bounds }) {
 
   // Proportions from the glasses: eyes sit in the lenses, brows above them.
   const bandMid = (glasses.top + glasses.bottom) / 2
-  const lensHalfW = glasses.halfWidth * 0.4
+  // The frames were measured on the unslimmed head, so they slim with it.
+  const frameHalf = glasses.halfWidth * slim
+  const lensHalfW = frameHalf * 0.4
   const lensHalfH = Math.max(3, (glasses.top - glasses.bottom) / 2 + 1)
-  const lensX = glasses.halfWidth - lensHalfW - 0.5
+  const lensX = frameHalf - lensHalfW - 0.5
   const EYE = { x: lensX - 0.6, y: bandMid - 0.2 }
   const BROW = { x: lensX + 0.3, y: glasses.top + 2.6, half: lensHalfW * 0.95 }
   const faceHalf = Math.max(8, headHalfWidth(mouthY, az))
@@ -377,7 +388,7 @@ export function buildCaricature(m, shape, { bounds }) {
       if (Math.abs(out - 1) < 0.6 && Math.abs(dy - 1) < 0.6) return PALETTE.glint
       if (Math.hypot(dx, dy) <= 0.75) return PALETTE.pupil
       if ((dx / 1.6) ** 2 + (dy / 1.45) ** 2 <= 1) return PALETTE.iris
-      if ((dx / 2.7) ** 2 + (dy / 1.7) ** 2 <= 1) return PALETTE.sclera
+      if ((dx / 2.7) ** 2 + (dy / 1.55) ** 2 <= 1) return PALETTE.sclera
     }
 
     // Brows: thick, dark, nearly straight.
@@ -408,10 +419,14 @@ export function buildCaricature(m, shape, { bounds }) {
       if (fold <= 0.55) return PALETTE.skinMid
     }
 
-    // Beard shadow over the jaw, chin and upper lip, speckled.
+    // Beard shadow, speckled: dense on the chin and upper lip, thinning out
+    // across the cheeks toward the ears.
     const belowNose = y <= noseBase - 1.5
     const jawline = y <= MOUTH.y - 3 || Math.abs(dx0) >= MOUTH.half + 1.6
-    if (belowNose && (jawline || y >= MOUTH.y + 1.8) && hash3(x, y, z) > 0.62) return PALETTE.stubble
+    if (belowNose && (jawline || y >= MOUTH.y + 1.8)) {
+      const goatee = Math.abs(dx0) <= MOUTH.half * 0.8
+      if (hash3(x, y, z) > (goatee ? 0.45 : 0.7)) return PALETTE.stubble
+    }
     return null
   }
 
@@ -421,9 +436,10 @@ export function buildCaricature(m, shape, { bounds }) {
   function hairColour(x, y, z) {
     if (z < az - 8) return PALETTE.hairDark
     if (Math.abs(x - ax) >= 11 && y <= glasses.top + 10 && hash3(x, y, z) > 0.88) return PALETTE.hairGrey
+    // An even short crop: only a little variation, or it reads as patchy.
     const n = clump(x, y, z, 3, 5)
-    if (n > 0.78 && y > glasses.top + 8 && z > az - 2) return PALETTE.hairLight
-    if (n < 0.18) return PALETTE.hairDark
+    if (n > 0.9 && y > glasses.top + 8 && z > az - 2) return PALETTE.hairLight
+    if (n < 0.08) return PALETTE.hairDark
     return PALETTE.hair
   }
 
