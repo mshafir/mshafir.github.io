@@ -13,7 +13,7 @@
     "url": "https://github.com/mshafir/auto-adventure",
     "blurb": "A terminal-based graphical adventure game with tile based rendering and a declarative game structure that LLMs can understand. This started with LLM generating text and missing in-game, but that wasn't very fun so I just pivoted to being able to prompt the LLM to generate a full game for you. Still needs a lot of work, thinking of maybe restarting the goal from scratch.",
     "language": "TypeScript",
-    "stars": 1,
+    "stars": 2,
     "pushedAt": "2026-08-17T12:56:53Z",
     "featured": true
   },
@@ -32,7 +32,7 @@
     "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
     "language": "JavaScript",
     "stars": 0,
-    "pushedAt": "2026-09-22T11:46:22Z",
+    "pushedAt": "2026-09-23T11:45:25Z",
     "featured": false
   },
   {
