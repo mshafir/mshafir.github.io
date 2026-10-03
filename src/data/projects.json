@@ -27,21 +27,21 @@
     "featured": true
   },
   {
+    "name": "mshafir.github.io",
+    "url": "https://github.com/mshafir/mshafir.github.io",
+    "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
+    "language": "JavaScript",
+    "stars": 0,
+    "pushedAt": "2026-10-02T12:45:03Z",
+    "featured": false
+  },
+  {
     "name": "seply-learn",
     "url": "https://github.com/mshafir/seply-learn",
     "blurb": "",
     "language": "TypeScript",
     "stars": 1,
     "pushedAt": "2026-10-01T18:24:13Z",
-    "featured": false
-  },
-  {
-    "name": "mshafir.github.io",
-    "url": "https://github.com/mshafir/mshafir.github.io",
-    "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
-    "language": "JavaScript",
-    "stars": 0,
-    "pushedAt": "2026-10-01T13:26:44Z",
     "featured": false
   },
   {
