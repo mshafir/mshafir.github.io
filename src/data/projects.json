@@ -27,12 +27,12 @@
     "featured": true
   },
   {
-    "name": "seply-learn",
-    "url": "https://github.com/mshafir/seply-learn",
-    "blurb": "",
-    "language": "TypeScript",
-    "stars": 1,
-    "pushedAt": "2026-10-12T22:10:32Z",
+    "name": "3dprints",
+    "url": "https://github.com/mshafir/3dprints",
+    "blurb": "Parametric CadQuery models for 3D printing: pill case and bathroom sink organizer",
+    "language": "Python",
+    "stars": 0,
+    "pushedAt": "2026-10-14T00:37:19Z",
     "featured": false
   },
   {
@@ -41,7 +41,16 @@
     "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
     "language": "JavaScript",
     "stars": 0,
-    "pushedAt": "2026-10-12T15:37:29Z",
+    "pushedAt": "2026-10-13T14:19:15Z",
+    "featured": false
+  },
+  {
+    "name": "seply-learn",
+    "url": "https://github.com/mshafir/seply-learn",
+    "blurb": "",
+    "language": "TypeScript",
+    "stars": 1,
+    "pushedAt": "2026-10-12T22:10:32Z",
     "featured": false
   },
   {
