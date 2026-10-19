@@ -27,21 +27,21 @@
     "featured": true
   },
   {
+    "name": "mshafir.github.io",
+    "url": "https://github.com/mshafir/mshafir.github.io",
+    "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
+    "language": "JavaScript",
+    "stars": 0,
+    "pushedAt": "2026-10-18T11:16:42Z",
+    "featured": false
+  },
+  {
     "name": "3dprints",
     "url": "https://github.com/mshafir/3dprints",
     "blurb": "Parametric CadQuery models for 3D printing: pill case and bathroom sink organizer",
     "language": "Python",
     "stars": 0,
     "pushedAt": "2026-10-18T02:00:51Z",
-    "featured": false
-  },
-  {
-    "name": "mshafir.github.io",
-    "url": "https://github.com/mshafir/mshafir.github.io",
-    "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
-    "language": "JavaScript",
-    "stars": 0,
-    "pushedAt": "2026-10-17T10:51:38Z",
     "featured": false
   },
   {
