@@ -29,10 +29,10 @@
   {
     "name": "seply-learn",
     "url": "https://github.com/mshafir/seply-learn",
-    "blurb": "",
+    "blurb": "Seply Learn: build and explore bodies of knowledge with AI. Concepts, linked and read through Views, curated with suggestions you accept or dismiss. Web, desktop and self-host.",
     "language": "TypeScript",
     "stars": 1,
-    "pushedAt": "2026-10-28T13:24:02Z",
+    "pushedAt": "2026-10-29T19:42:18Z",
     "featured": false
   },
   {
@@ -41,7 +41,7 @@
     "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
     "language": "JavaScript",
     "stars": 0,
-    "pushedAt": "2026-10-28T13:05:17Z",
+    "pushedAt": "2026-10-29T13:11:55Z",
     "featured": false
   },
   {
