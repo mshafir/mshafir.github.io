@@ -32,7 +32,7 @@
     "blurb": "Personal portfolio and blog — voxel hero, matrix project tiles, keyboard-driven. React + Vite, prerendered to static HTML.",
     "language": "JavaScript",
     "stars": 0,
-    "pushedAt": "2026-11-08T13:34:27Z",
+    "pushedAt": "2026-11-09T16:31:37Z",
     "featured": false
   },
   {
@@ -40,7 +40,7 @@
     "url": "https://github.com/mshafir/3dprints",
     "blurb": "Parametric CadQuery models for 3D printing: pill case and bathroom sink organizer",
     "language": "Python",
-    "stars": 0,
+    "stars": 1,
     "pushedAt": "2026-11-04T13:34:05Z",
     "featured": false
   },
