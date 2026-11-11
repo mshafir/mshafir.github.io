@@ -35,11 +35,15 @@ export const ProjectTile = forwardRef<HTMLAnchorElement, { project: Project; var
             {project.language}
           </span>
         )}
-        <span className="tile__chip" title={`${project.stars} stars`}>
-          <span aria-hidden="true">★</span>
-          {project.stars}
-        </span>
-        <span className="tile__chip tile__chip--date">{formatDate(project.pushedAt)}</span>
+        {!project.custom && (
+          <span className="tile__chip" title={`${project.stars} stars`}>
+            <span aria-hidden="true">★</span>
+            {project.stars}
+          </span>
+        )}
+        {project.pushedAt && (
+          <span className="tile__chip tile__chip--date">{formatDate(project.pushedAt)}</span>
+        )}
       </div>
     )
 

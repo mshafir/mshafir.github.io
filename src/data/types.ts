@@ -6,6 +6,8 @@ export interface Project {
   stars: number
   pushedAt: string
   featured: boolean
+  /** Hand-added in projects.config.yaml rather than fetched from GitHub. */
+  custom?: boolean
 }
 
 export interface VoxelData {

@@ -63,4 +63,38 @@ describe('curate', () => {
     expect(() => curate(repos, {})).not.toThrow()
     expect(curate(repos, {}).length).toBe(4)
   })
+  describe('custom projects', () => {
+    const custom = [
+      { name: 'codenames-talk', url: 'https://example.com/talk', blurb: 'Slides from a talk.', date: '2026-10-01' },
+    ]
+
+    it('includes custom projects alongside GitHub repos', () => {
+      const byName = Object.fromEntries(curate(repos, { custom }).map((p) => [p.name, p]))
+      expect(byName['codenames-talk']).toEqual({
+        name: 'codenames-talk',
+        url: 'https://example.com/talk',
+        blurb: 'Slides from a talk.',
+        language: null,
+        stars: 0,
+        pushedAt: '2026-10-01',
+        featured: false,
+        custom: true,
+      })
+    })
+
+    it('can feature a custom project', () => {
+      const names = curate(repos, { custom, featured: ['codenames-talk'] }).map((p) => p.name)
+      expect(names[0]).toBe('codenames-talk')
+    })
+
+    it('can hide a custom project', () => {
+      const names = curate(repos, { custom, hidden: ['codenames-talk'] }).map((p) => p.name)
+      expect(names).not.toContain('codenames-talk')
+    })
+
+    it('sorts an undated custom project after dated ones', () => {
+      const names = curate(repos, { custom: [{ name: 'undated', url: 'u', blurb: '' }] }).map((p) => p.name)
+      expect(names.at(-1)).toBe('undated')
+    })
+  })
 })
