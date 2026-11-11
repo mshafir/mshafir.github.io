@@ -12,7 +12,10 @@ npm run dev
 
 ## Write a post
 
-Add a markdown file to `content/posts/`. The filename becomes the URL slug.
+The easy way: the desktop editor in [`editor/`](editor/README.md) (`cd editor && npm install && npm start`)
+writes posts, images and project curation straight into this repo.
+
+By hand: add a markdown file to `content/posts/`. The filename becomes the URL slug.
 
 ```markdown
 ---
@@ -38,8 +41,9 @@ npm run data:github    # re-fetch GitHub repos into src/data/projects.json
 npm run data:figure    # redraw the voxel figure from content/figure/head.json
 ```
 
-Edit `content/projects.config.yaml` to pin the featured order, hide a repo, or
-override a description. Both outputs are committed, so a build never needs
+Edit `content/projects.config.yaml` (or use the editor's Projects screen) to pin
+the featured order, hide a repo, override a description, or add a non-GitHub
+project under `custom:` (`name`, `url`, `blurb`, optional `language` and `date`). Both outputs are committed, so a build never needs
 network access. A nightly workflow re-runs the GitHub fetch and commits it when
 stars or push dates change.
 
