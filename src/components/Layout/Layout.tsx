@@ -57,7 +57,11 @@ export function Layout() {
       </main>
       <footer className="layout__footer">
         <span>© {new Date().getFullYear()} Michael Shafir</span>
-        <a href="https://github.com/mshafir">github.com/mshafir</a>
+        <span className="layout__footer-links">
+          <a href="https://github.com/mshafir">github</a>
+          <a href="https://www.linkedin.com/in/michael-shafir-25832212/">linkedin</a>
+          <a href="https://x.com/mpshafir">x</a>
+        </span>
       </footer>
       {isDesktop && (
         <>

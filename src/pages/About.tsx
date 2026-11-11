@@ -41,6 +41,12 @@ export default function About() {
           <li>
             <a href="https://github.com/mshafir">GitHub</a> — @mshafir
           </li>
+          <li>
+            <a href="https://www.linkedin.com/in/michael-shafir-25832212/">LinkedIn</a> — Michael Shafir
+          </li>
+          <li>
+            <a href="https://x.com/mpshafir">X</a> — @mpshafir
+          </li>
         </ul>
       </div>
     </div>

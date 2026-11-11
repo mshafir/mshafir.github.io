@@ -33,6 +33,12 @@ export default function Home() {
             <a className="hero__link" href="https://github.com/mshafir">
               github
             </a>
+            <a className="hero__link" href="https://www.linkedin.com/in/michael-shafir-25832212/">
+              linkedin
+            </a>
+            <a className="hero__link" href="https://x.com/mpshafir">
+              x
+            </a>
             <Link className="hero__link" to="/writing">
               writing
             </Link>

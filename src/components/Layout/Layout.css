@@ -3,6 +3,11 @@
   outline: none;
 }
 
+.layout__footer-links {
+  display: flex;
+  gap: var(--space-4);
+}
+
 .layout__footer {
   display: flex;
   justify-content: space-between;
