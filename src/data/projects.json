@@ -9,21 +9,30 @@
     "featured": true
   },
   {
+    "name": "3dprints",
+    "url": "https://github.com/mshafir/3dprints",
+    "blurb": "Repo for claude-generated 3d printer models scripts via CadQuery and knowledge accumulated from iterating on it with me IRL",
+    "language": "Python",
+    "stars": 1,
+    "pushedAt": "2026-11-04T13:34:05Z",
+    "featured": true
+  },
+  {
+    "name": "seply-learn",
+    "url": "https://github.com/mshafir/seply-learn",
+    "blurb": "An app for building personal visualized wikis for learning with AI and coming back to what you've learned",
+    "language": "TypeScript",
+    "stars": 1,
+    "pushedAt": "2026-10-29T19:42:18Z",
+    "featured": true
+  },
+  {
     "name": "auto-adventure",
     "url": "https://github.com/mshafir/auto-adventure",
     "blurb": "A terminal-based graphical adventure game with tile based rendering and a declarative game structure that LLMs can understand. This started with LLM generating text and missing in-game, but that wasn't very fun so I just pivoted to being able to prompt the LLM to generate a full game for you. Still needs a lot of work, thinking of maybe restarting the goal from scratch.",
     "language": "TypeScript",
     "stars": 2,
     "pushedAt": "2026-08-17T12:56:53Z",
-    "featured": true
-  },
-  {
-    "name": "reactlit",
-    "url": "https://github.com/mshafir/reactlit",
-    "blurb": "My last artisanally coded project. A faster way to build React apps — Streamlit's ergonomics without leaving the React ecosystem. Probably not relevant anymore to anybody, but was a fun experiment and still think it has some value for lightweight internal tooling that reuses react components.",
-    "language": "TypeScript",
-    "stars": 12,
-    "pushedAt": "2025-04-25T15:04:25Z",
     "featured": true
   },
   {
@@ -36,21 +45,12 @@
     "featured": false
   },
   {
-    "name": "3dprints",
-    "url": "https://github.com/mshafir/3dprints",
-    "blurb": "Parametric CadQuery models for 3D printing: pill case and bathroom sink organizer",
-    "language": "Python",
-    "stars": 1,
-    "pushedAt": "2026-11-04T13:34:05Z",
-    "featured": false
-  },
-  {
-    "name": "seply-learn",
-    "url": "https://github.com/mshafir/seply-learn",
-    "blurb": "Seply Learn: build and explore bodies of knowledge with AI. Concepts, linked and read through Views, curated with suggestions you accept or dismiss. Web, desktop and self-host.",
+    "name": "reactlit",
+    "url": "https://github.com/mshafir/reactlit",
+    "blurb": "My last artisanally coded project. A faster way to build React apps — Streamlit's ergonomics without leaving the React ecosystem. Probably not relevant anymore to anybody, but was a fun experiment and still think it has some value for lightweight internal tooling that reuses react components.",
     "language": "TypeScript",
-    "stars": 1,
-    "pushedAt": "2026-10-29T19:42:18Z",
+    "stars": 12,
+    "pushedAt": "2025-04-25T15:04:25Z",
     "featured": false
   },
   {
