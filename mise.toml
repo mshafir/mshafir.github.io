@@ -1,0 +1,55 @@
+[tools]
+# Matches the GitHub Actions workflows (deploy, refresh-projects).
+node = "22"
+
+[tasks.install]
+description = "Install the site's dependencies"
+run = "npm install"
+
+[tasks.dev]
+description = "Run the site locally with hot reload"
+run = "npm run dev"
+
+[tasks.test]
+description = "Run the site and editor test suites"
+run = ["npm test", "npm --prefix editor test"]
+
+[tasks.build]
+description = "Build the static site into dist/"
+run = "npm run build"
+
+[tasks."data:github"]
+description = "Refresh src/data/projects.json from GitHub"
+run = "npm run data:github"
+
+[tasks."editor:install"]
+description = "Install the editor's dependencies, including the Electron binary"
+dir = "editor"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+[ -d node_modules ] || npm install
+# npm may skip Electron's download script; fetch the binary if it is missing.
+[ -d node_modules/electron/dist ] || node node_modules/electron/install.js
+'''
+
+[tasks.editor]
+description = "Build and open the desktop site editor"
+depends = ["editor:install"]
+dir = "editor"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+npm run build
+exec npx electron . $(bash scripts/sandbox-flag.sh)
+'''
+
+[tasks."editor:dev"]
+description = "Open the editor with hot reload for its window"
+depends = ["editor:install"]
+dir = "editor"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+ELECTRON_EXTRA_ARGS="$(bash scripts/sandbox-flag.sh)" npm run dev
+'''

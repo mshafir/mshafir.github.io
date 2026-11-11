@@ -5,14 +5,22 @@ GitHub Pages.
 
 ## Develop
 
+[mise](https://mise.jdx.dev) pins Node 22 (as CI uses) and wraps the common commands:
+
 ```bash
-npm install
-npm run dev
+mise install          # Node
+mise run install      # npm install
+mise run dev          # site with hot reload
+mise run editor       # the desktop editor (installs its deps on first run)
+mise run test         # site + editor tests
+mise tasks            # everything else
 ```
+
+Plain `npm install && npm run dev` works too.
 
 ## Write a post
 
-The easy way: the desktop editor in [`editor/`](editor/README.md) (`cd editor && npm install && npm start`)
+The easy way: the desktop editor in [`editor/`](editor/README.md) (`mise run editor`)
 writes posts, images and project curation straight into this repo.
 
 By hand: add a markdown file to `content/posts/`. The filename becomes the URL slug.

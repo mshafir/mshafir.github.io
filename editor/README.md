@@ -3,6 +3,9 @@
 A local desktop app for writing posts and curating projects on this site. It edits the
 repo's files directly; you commit and push yourself.
 
+From the repo root: `mise run editor` (or `mise run editor:dev` for hot reload). It installs
+dependencies on first run and handles the Linux sandbox note below. Or by hand:
+
 ```bash
 cd editor
 npm install
@@ -19,7 +22,8 @@ sudo chown root:root node_modules/electron/dist/chrome-sandbox
 sudo chmod 4755 node_modules/electron/dist/chrome-sandbox
 ```
 
-(or run `npm start -- --no-sandbox`). Reinstalling Electron undoes the fix.
+(or run `npm start -- --no-sandbox`). Reinstalling Electron undoes the fix. `mise run editor`
+checks for this and starts without the sandbox, with a note, when the fix isn't in place.
 
 ## What it writes
 

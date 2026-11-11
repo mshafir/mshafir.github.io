@@ -9,7 +9,8 @@ const server = await createServer({ server: { port: 5199, strictPort: true } })
 await server.listen()
 
 const electron = createRequire(import.meta.url)('electron')
-const child = spawn(electron, ['.'], {
+const extra = (process.env.ELECTRON_EXTRA_ARGS ?? '').split(' ').filter(Boolean)
+const child = spawn(electron, ['.', ...extra, ...process.argv.slice(2)], {
   stdio: 'inherit',
   env: { ...process.env, VITE_DEV_URL: 'http://localhost:5199/' },
 })
