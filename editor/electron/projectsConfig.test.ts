@@ -3,10 +3,11 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { readProjectsConfig, writeProjectsConfig } from './projectsConfig'
 
-const real = readFileSync(resolve(__dirname, '../../content/projects.config.yaml'), 'utf8')
+// A snapshot of the site's config, so editing the real one doesn't break these tests.
+const real = readFileSync(resolve(__dirname, 'fixtures/projects.config.yaml'), 'utf8')
 
 describe('projects config', () => {
-  it('reads featured, hidden and blurbs from the real file', () => {
+  it('reads featured, hidden and blurbs from the site config', () => {
     const config = readProjectsConfig(real)
     expect(config.featured).toEqual(['investbot', 'auto-adventure', 'reactlit'])
     expect(config.hidden).toContain('weddingsite')

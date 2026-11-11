@@ -24,6 +24,10 @@ beforeEach(() => {
   for (const path of ['content', 'scripts/lib/curate.mjs', 'src/data/projects.json']) {
     cpSync(join(realSite, path), join(root, path), { recursive: true })
   }
+  // Tests run against a known post rather than whatever is in content/posts.
+  rmSync(join(root, 'content/posts'), { recursive: true })
+  mkdirSync(join(root, 'content/posts'))
+  cpSync(join(__dirname, 'fixtures/hello-world.md'), join(root, 'content/posts/hello-world.md'))
   trashed = []
   const cache = join(root, '.cache/github-repos.json')
   site = new Site(root, cache, async (path) => {

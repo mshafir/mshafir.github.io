@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { parsePostFile, serializePostFile } from './postFile'
 
-const helloWorld = readFileSync(resolve(__dirname, '../../content/posts/hello-world.md'), 'utf8')
+const helloWorld = readFileSync(resolve(__dirname, 'fixtures/hello-world.md'), 'utf8')
 
 describe('post files', () => {
   it('reads the frontmatter the site uses', () => {
